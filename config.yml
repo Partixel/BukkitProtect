@@ -1,0 +1,57 @@
+# default config.yml
+
+AutoUpdate: true
+
+# Protection
+
+MinimumZoneSize: 10
+
+ProtectChests: true #If a player places a chest and has no protections, a new one is created around the chest
+
+# Land
+
+BuyableLand: true
+StartLand: 100 # Width X Length ( 10 x 10 )
+
+LandGain: 20 #The amount you gain
+LandDelay: 1200 #The delay between each gain of land
+SendMessage: true #Sends a message when they gain land
+
+# Block
+
+RightClickIronDoor: true
+
+FireBurn: false
+FireSpread: false
+
+# Players
+
+PlayersTrampleCrops: true
+
+PlayersCanCreatePortals: true
+
+# Entity
+
+EntitiesTrampleCrops: false
+
+TNTDamageEntity: true
+TNTBlockDamage: false
+
+TNTCartDamageEntity: true
+TNTCartBlockDamage: false
+
+CreeperDamageEntity: true
+CreeperBlockDamage: false
+
+GhastDamageEntity: true
+GhastBlockDamage: true
+
+WitherDamageEntity: true
+WitherBlockDamage: false
+
+WitherHeadDamageEntity: true
+WitherHeadBlockDamage: false
+
+EndermenBlockChange: false
+
+ZombiesBreakDoors: true

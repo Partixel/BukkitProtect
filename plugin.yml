@@ -1,0 +1,84 @@
+name: BukkitProtect
+main: io.github.elitejynx.BukkitProtect.BukkitProtect
+author: EliteJynx
+version: A-1.4
+permissions:
+  BukkitProtect.Protection.*:
+    description: Gives access to all protection permissions
+    children:
+      BukkitProtect.Protection.SelectOthers: true
+      BukkitProtect.Protection.RemoveOthers: true
+      BukkitProtect.Protection.EditOthers: true
+  BukkitProtect.Protection.SelectOthers:
+    description: Gives player access to selecting others regions
+    default: op
+  BukkitProtect.Protection.RemoveOthers:
+    description: Allows player to remove others regions
+    default: op
+  BukkitProtect.Protection.EditOthers:
+    description: Allows player to edit others regions
+    default: op
+  BukkitProtect.Commands.*:
+    description: Gives access to all command permissions
+    children:
+      BukkitProtect.Commands.GiveRod: true
+      BukkitProtect.Commands.Tag: true
+      BukkitProtect.Commands.GiveLand: true
+      BukkitProtect.Commands.Users: true
+      BukkitProtect.Commands.SetOwner: true
+      BukkitProtect.Commands.RemoveProtections: true
+  BukkitProtect.Commands.GiveRod:
+    description: Give yourself a Rod of the Admin
+    default: op
+  BukkitProtect.Commands.Tag:
+    description: Allows players to use the add/removeTag command
+    default: op
+  BukkitProtect.Commands.GiveLand:
+    description: Allows players to use the GiveLand command
+    default: op
+  BukkitProtect.Commands.Users:
+    description: Allow players to use the add/removeUsers command
+    default: true
+  BukkitProtect.Commands.SetOwner:
+    description: Allows players to use the SetOwner command
+    default: true
+  BukkitProtect.Commands.RemoveProtections:
+    description: Allows players to use the remove(all)protection(s) commands
+    default: true
+commands:
+  GiveRod:
+    description: Give yourself a Rod of the Admin
+    usage: /<command> [player]
+  AddUsers:
+    description: Add a player to the selected protection
+    usage: /<command> [player] [type]
+  RemoveUsers:
+    description: Remove a player from the selected protection
+    usage: /<command> [player] [type]
+  GetUsers:
+    description: Gets the users in the selected protection
+    usage: /<command>
+  SetOwner:
+    description: Set a player as the owner of the selected protection
+    usage: /<command> [player]
+  RemoveProtection:
+    description: Remove the selected protection
+    usage: /<command>
+  RemoveAllProtections:
+    description: Remove all your protection
+    usage: /<command>
+  AddTag:
+    description: Add a tag to the selected protection
+    usage: /<command> [Tag]
+  RemoveTag:
+    description: Remove a tag from the selected protection
+    usage: /<command> [Tag]
+  GiveLand:
+    description: Gives a player more land
+    usage: /<command> [Player] [Int]
+  SetLand:
+    description: Sets a players land
+    usage: /<command> [Player] [Int]
+  GetLand:
+    description: Gets a players land
+    usage: /<command> [Player]
