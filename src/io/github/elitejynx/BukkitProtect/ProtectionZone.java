@@ -191,7 +191,9 @@ public class ProtectionZone {
 	}
 	
 	public boolean userHasAdminType(String Plr) {
-		if (Users.containsKey(Plr)) {
+		if (Owner.equalsIgnoreCase(Plr)){
+			return true;
+		} else if (Users.containsKey(Plr)) {
 			for (String str : Users.get(Plr)) {
 				UserType UT = Util.parseUserType(str);
 				if (UT != null) {

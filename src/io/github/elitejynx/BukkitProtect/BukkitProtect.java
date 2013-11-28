@@ -74,7 +74,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class BukkitProtect extends JavaPlugin implements Listener {
 
 	// The class handling PVP
-	PVPHandler PVP;
+	public static PVPHandler PVP;
 	public static BukkitProtect Plugin;
 
 	// Files
@@ -514,13 +514,8 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 					return true;
 				}
 				if (PVP.PlayerSelectedZone.containsKey(Sender)) {
-					if (((ProtectionZone) PVP.PlayerSelectedZone.get(Sender)
-							.keySet().toArray()[0]).userHasAdminType(
-							((Player) Sender).getName())
-							|| Sender
-									.hasPermission("BukkitProtect.Protection.EditOthers"))
-						((ProtectionZone) PVP.PlayerSelectedZone.get(Sender)
-								.keySet().toArray()[0]).removeUsers(Target, UT);
+					if (((ProtectionZone) PVP.PlayerSelectedZone.get(Sender).keySet().toArray()[0]).userHasAdminType(((Player) Sender).getName()) || Sender.hasPermission("BukkitProtect.Protection.EditOthers"))
+						((ProtectionZone) PVP.PlayerSelectedZone.get(Sender).keySet().toArray()[0]).removeUsers(Target, UT);
 				} else {
 					Sender.sendMessage("You have not selected a protection, to do this right click with a stick inside a protection");
 					return true;
@@ -1754,8 +1749,8 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 						.getEntity().getLocation());
 				if (Protection == null
 						|| Protection
-								.userHasType(((Player) ((Tameable) Event
-										.getEntity()).getOwner()).getName(),
+								.userHasType(((Tameable) Event
+										.getEntity()).getOwner().getName(),
 										UTEntities)) {
 					return;
 				} else {
