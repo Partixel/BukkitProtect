@@ -277,12 +277,12 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 			} else {
 				((Player) Sender).getInventory().addItem(RodA);
 			}
-		} else if (Cmd.getName().equalsIgnoreCase("setOwner")) {
+		} else if (Cmd.getName().equalsIgnoreCase("setowner")) {
 			if (!(Sender instanceof Player)) {
 				Sender.sendMessage("You must be a player to use this");
 				return true;
 			}
-			if (!Sender.hasPermission("BukkitProtect.Commands.SetOwner")) {
+			if (!Sender.hasPermission("BukkitProtect.Commands.EditOthers")) {
 				Sender.sendMessage("You do not have permission to use this");
 				return true;
 			}
@@ -346,6 +346,129 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 							Protections.put(Sender.getName(), ZonesA);
 							Protections.put(Target.getName(), ZonesB);
 						}
+					}
+				} else {
+					Sender.sendMessage("You have not selected a protection, to do this right click with a stick inside a protection");
+					return true;
+				}
+			} else if (Args.length > 1) {
+				Sender.sendMessage("Too many arguements, please retry");
+				return false;
+			} else {
+				return false;
+			}
+		} else if (Cmd.getName().equalsIgnoreCase("accept")) {
+				if (!(Sender instanceof Player)) {
+					Sender.sendMessage("You must be a player to use this");
+					return true;
+				}
+				if (!Sender.hasPermission("BukkitProtect.Commands.Accept")) {
+					Sender.sendMessage("You do not have permission to use this");
+					return true;
+				}
+				if (Args.length == 0) {
+					for (Player Plr : PVP.CommandTrades.keySet()) {
+						CommandRequest Request = PVP.CommandTrades.get(Plr);
+						if (Request.getTarget() == (Player) Sender) {
+							if (!Request.getAccepted()) {
+								Request.setAccepted(true);
+								onCommand(Request.getSender(), Request.getCommand(), Request.getCommand().getName(), Request.getArgs());
+								Request.getSender().sendMessage("The command has been accepted");
+								Request.getTarget().sendMessage("You have accepted the command");
+								PVP.CommandTrades.put(Plr, Request);
+								return true;
+							}
+						}
+					}
+					Sender.sendMessage("You have no pending requests");
+					return true;
+				} else if (Args.length > 0) {
+					Sender.sendMessage("Too many arguements, please retry");
+					return false;
+				} else {
+					((Player) Sender).getInventory().addItem(RodA);
+				}
+		} else if (Cmd.getName().equalsIgnoreCase("transfer")) {
+			if (!(Sender instanceof Player)) {
+				Sender.sendMessage("You must be a player to use this");
+				return true;
+			}
+			if (!Sender.hasPermission("BukkitProtect.Commands.Transfer")) {
+				Sender.sendMessage("You do not have permission to use this");
+				return true;
+			}
+			if (Args.length == 1) {
+				Player Target = (Bukkit.getPlayer(Args[0]));
+				if (Target == null) {
+					Sender.sendMessage("Could not find that player");
+					return true;
+				}
+				if (Target == (Player) Sender) {
+					Sender.sendMessage("Cannot transfer to yourself");
+					return true;
+				}
+				if (PVP.PlayerSelectedZone.containsKey(Sender)) {
+					if (PVP.CommandTrades.containsKey(Sender) && PVP.CommandTrades.get(Sender).getTarget() == Target && PVP.CommandTrades.get(Sender).getAccepted()){
+						if (((ProtectionZone) PVP.PlayerSelectedZone.get(Sender)
+								.keySet().toArray()[0]).getOwner()
+								.equalsIgnoreCase(Sender.getName())
+								|| Sender
+										.hasPermission("BukkitProtect.Protection.EditOthers")) {
+							int Length = Math
+									.abs(((ProtectionZone) PVP.PlayerSelectedZone
+											.get(Sender).keySet().toArray()[0])
+											.getCorner1().getBlockX()
+											- ((ProtectionZone) PVP.PlayerSelectedZone
+													.get(Sender).keySet().toArray()[0])
+													.getCorner2().getBlockX());
+							int Width = Math
+									.abs(((ProtectionZone) PVP.PlayerSelectedZone
+											.get(Sender).keySet().toArray()[0])
+											.getCorner1().getBlockZ()
+											- ((ProtectionZone) PVP.PlayerSelectedZone
+													.get(Sender).keySet().toArray()[0])
+													.getCorner2().getBlockZ());
+							if (getConfig().getBoolean("BuyableLand")) {
+								if (LandOwned.containsKey(Target.getName())) {
+									if ((LandOwned.get(Target.getName()) - getTotalLandUsed(Target)) < (Length * Width)) {
+										Sender.sendMessage(Target.getName()
+												+ " needs "
+												+ ((Length * Width) - (LandOwned
+														.get(Target.getName()) - getTotalLandUsed(Target)))
+												+ " more blocks of land to have the protection");
+										return true;
+									}
+								}
+							}
+							if (Protections
+									.containsKey(((ProtectionZone) PVP.PlayerSelectedZone
+											.get(Sender).keySet().toArray()[0])
+											.getOwner())) {
+								ProtectionZone Zone = ((ProtectionZone) PVP.PlayerSelectedZone
+										.get(Sender).keySet().toArray()[0]).Clone();
+								ArrayList<ProtectionZone> ZonesA = Protections
+										.get(((ProtectionZone) PVP.PlayerSelectedZone
+												.get(Sender).keySet().toArray()[0])
+												.getOwner());
+								ArrayList<ProtectionZone> ZonesB = Protections
+										.get(Target.getName());
+								if (ZonesB == null) {
+									ZonesB = new ArrayList<ProtectionZone>();
+								}
+								ZonesA.remove((PVP.PlayerSelectedZone.get(Sender)
+										.keySet().toArray()[0]));
+								Zone.setOwner(Target.getName());
+								ZonesB.add(Zone);
+								Protections.put(Sender.getName(), ZonesA);
+								Protections.put(Target.getName(), ZonesB);
+							}
+						}
+					} else {
+						CommandRequest Trades = new CommandRequest((Player) Sender, Target, false, Cmd, Args);
+						PVP.CommandTrades.put((Player) Sender, Trades);
+						PVP.CommandTimers.put((Player) Sender, 10);
+						Sender.sendMessage("Waiting for player to accept");
+						Target.sendMessage(Sender.getName() + " wishes to give you a protection, say /accept to accept or wait 10 seconds for it to time out");
 					}
 				} else {
 					Sender.sendMessage("You have not selected a protection, to do this right click with a stick inside a protection");
@@ -447,36 +570,28 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 				}
 				return false;
 			}
-		} else if (Cmd.getName().equalsIgnoreCase("giveland")) {
+		} else if (Cmd.getName().equalsIgnoreCase("getusers")) {
 			if (!(Sender instanceof Player)) {
 				Sender.sendMessage("You must be a player to use this");
 				return true;
 			}
-			if (!Sender.hasPermission("BukkitProtect.Commands.GiveLand")) {
+			if (!Sender.hasPermission("BukkitProtect.Commands.Users")) {
 				Sender.sendMessage("You do not have permission to use this");
 				return true;
 			}
-			if (Args.length == 2) {
-				Player Target = (Bukkit.getPlayer(Args[0]));
-				if (Target == null) {
-					Sender.sendMessage("Could not find that player");
-					return true;
-				}
-				int Num = 0;
-				try {
-					Num = Integer.parseInt(Args[1]);
-				} catch (Exception e) {
-					Sender.sendMessage("The second arguement must be an integer");
-					return true;
-				}
-				if (Num != 0) {
-					if (LandOwned.containsKey(Target.getName())) {
-						LandOwned.put(Target.getName(),
-								LandOwned.get(Target.getName()).intValue()
-										+ Num);
+			if (Args.length == 0) {
+				if (PVP.PlayerSelectedZone.containsKey(Sender)) {
+					if (((ProtectionZone) PVP.PlayerSelectedZone.get(Sender).keySet().toArray()[0]).userHasAdminType(((Player) Sender).getName()) || Sender.hasPermission("BukkitProtect.Protection.EditOthers")) {
+						for (String User : ((ProtectionZone) PVP.PlayerSelectedZone.get(Sender).keySet().toArray()[0]).getUsers().keySet()) {
+							String UserHas = ((ProtectionZone) PVP.PlayerSelectedZone.get(Sender).keySet().toArray()[0]).getUsers().get(User).toString().split("\\[")[1].split("\\]")[0];
+							Sender.sendMessage(User + " : " + UserHas);
+						}
 					}
+				} else {
+					Sender.sendMessage("You have not selected a protection, to do this right click with a stick inside a protection");
+					return true;
 				}
-			} else if (Args.length > 2) {
+			} else if (Args.length > 0) {
 				Sender.sendMessage("Too many arguements, please retry");
 				return false;
 			} else {
@@ -580,16 +695,22 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 							.equalsIgnoreCase(Sender.getName())
 							|| Sender
 									.hasPermission("BukkitProtect.Protection.RemoveOthers")) {
-						ArrayList<ProtectionZone> Zones = Protections
-								.get(((ProtectionZone) PVP.PlayerSelectedZone
-										.get(Sender).keySet().toArray()[0])
-										.getOwner());
-						Zones.remove((PVP.PlayerSelectedZone.get(Sender)
-								.keySet().toArray()[0]));
-						Protections.put(
-								((ProtectionZone) PVP.PlayerSelectedZone
-										.get(Sender).keySet().toArray()[0])
-										.getOwner(), Zones);
+						if (PVP.CommandTimers.containsKey(Sender)) {
+							ArrayList<ProtectionZone> Zones = Protections
+									.get(((ProtectionZone) PVP.PlayerSelectedZone
+											.get(Sender).keySet().toArray()[0])
+											.getOwner());
+							Zones.remove((PVP.PlayerSelectedZone.get(Sender)
+									.keySet().toArray()[0]));
+							Protections.put(
+									((ProtectionZone) PVP.PlayerSelectedZone
+											.get(Sender).keySet().toArray()[0])
+											.getOwner(), Zones);
+							PVP.CommandTimers.put((Player) Sender, -1);
+						} else {
+							PVP.CommandTimers.put((Player) Sender, 10);
+							Sender.sendMessage("Say the command again within 10 seconds to accept");
+						}
 					}
 					if (PVP.UpdateBlock.containsKey(Sender)) {
 						for (Block block : PVP.UpdateBlock.get(Sender).keySet()) {
@@ -617,13 +738,127 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 				return true;
 			}
 			if (Args.length == 0) {
-				Protections.remove(Sender.getName());
-				if (PVP.UpdateBlock.containsKey(Sender)) {
-					for (Block block : PVP.UpdateBlock.get(Sender).keySet()) {
-						PVP.UpdateBlock.get(Sender).put(block, 1);
+				if (PVP.CommandTimers.containsKey(Sender)) {
+					Protections.remove(Sender.getName());
+					if (PVP.UpdateBlock.containsKey(Sender)) {
+						for (Block block : PVP.UpdateBlock.get(Sender).keySet()) {
+							PVP.UpdateBlock.get(Sender).put(block, 1);
+						}
 					}
+				} else {
+					PVP.CommandTimers.put((Player) Sender, 10);
+					Sender.sendMessage("Say the command again within 10 seconds to accept");
 				}
 			} else if (Args.length > 0) {
+				Sender.sendMessage("Too many arguements, please retry");
+				return false;
+			} else {
+				return false;
+			}
+		} else if (Cmd.getName().equalsIgnoreCase("giveland")) {
+			if (!(Sender instanceof Player)) {
+				Sender.sendMessage("You must be a player to use this");
+				return true;
+			}
+			if (!Sender.hasPermission("BukkitProtect.Commands.AdminLand")) {
+				Sender.sendMessage("You do not have permission to use this");
+				return true;
+			}
+			if (Args.length == 2) {
+				Player Target = (Bukkit.getPlayer(Args[0]));
+				if (Target == null) {
+					Sender.sendMessage("Could not find that player");
+					return true;
+				}
+				int Num = 0;
+				try {
+					Num = Integer.parseInt(Args[1]);
+				} catch (Exception e) {
+					Sender.sendMessage("The second arguement must be an integer");
+					return true;
+				}
+				if (Num != 0) {
+					if (LandOwned.containsKey(Target.getName())) {
+						if (LandOwned.get(Target.getName()).intValue() - Num < 0) {
+							LandOwned.put(Target.getName(), 0);
+							Sender.sendMessage("Set targets land to 0 because the integer you specified was more then the land they owned");
+						} else {
+						LandOwned.put(Target.getName(), LandOwned.get(Target.getName()).intValue() + Num);
+						}
+					}
+				}
+			} else if (Args.length > 2) {
+				Sender.sendMessage("Too many arguements, please retry");
+				return false;
+			} else {
+				return false;
+			}
+		} else if (Cmd.getName().equalsIgnoreCase("setland")) {
+			if (!(Sender instanceof Player)) {
+				Sender.sendMessage("You must be a player to use this");
+				return true;
+			}
+			if (!Sender.hasPermission("BukkitProtect.Commands.AdminLand")) {
+				Sender.sendMessage("You do not have permission to use this");
+				return true;
+			}
+			if (Args.length == 2) {
+				Player Target = (Bukkit.getPlayer(Args[0]));
+				if (Target == null) {
+					Sender.sendMessage("Could not find that player");
+					return true;
+				}
+				int Num = 0;
+				try {
+					Num = Integer.parseInt(Args[1]);
+				} catch (Exception e) {
+					Sender.sendMessage("The second arguement must be an integer");
+					return true;
+				}
+				if (Num > 0) {
+					if (LandOwned.containsKey(Target.getName())) {
+						LandOwned.put(Target.getName(), Num);
+					}
+				} else {
+					Sender.sendMessage("The sencond arguement must be an integer more then 0");
+					return true;
+				}
+			} else if (Args.length > 2) {
+				Sender.sendMessage("Too many arguements, please retry");
+				return false;
+			} else {
+				return false;
+			}
+		} else if (Cmd.getName().equalsIgnoreCase("getland")) {
+			if (!(Sender instanceof Player)) {
+				Sender.sendMessage("You must be a player to use this");
+				return true;
+			}
+			if (Args.length == 1 && Sender.hasPermission("BukkitProtect.Commands.AdminLand")) {
+				Player Target = (Bukkit.getPlayer(Args[0]));
+				if (Target == null) {
+					Sender.sendMessage("Could not find that player");
+					return true;
+				}
+				if (LandOwned.containsKey(Target.getName())) {
+					if (Protections.containsKey(Target.getName())) {
+						Sender.sendMessage(Target.getName() + " has " + LandOwned.get(Target.getName()) + " land, of which " + getTotalLandUsed(Target) + " is used by a total of " + Protections.get(Target.getName()).size() + " protections.");
+					} else {
+						Sender.sendMessage(Target.getName() + " has " + LandOwned.get(Target.getName()) + " land, of which 0 is used by a total of 0 protections.");
+					}
+				}
+			} else if (Args.length == 0 && Sender.hasPermission("BukkitProtect.Commands.GetLand")) {
+				if (LandOwned.containsKey(Sender.getName())) {
+					if (Protections.containsKey(Sender.getName())) {
+						Sender.sendMessage("You have " + LandOwned.get(Sender.getName()) + " land, of which " + getTotalLandUsed((Player) Sender) + " is used by a total of " + Protections.get(Sender.getName()).size() + " protections.");
+					} else {
+						Sender.sendMessage("You have " + LandOwned.get(Sender.getName()) + " land, of which 0 is used by a total of 0 protections.");
+					}
+				}
+			} else if (Args.length == 0 || Args.length == 1) {
+				Sender.sendMessage("You do not have permission to use this");
+				return true;
+			} else if (Args.length > 1) {
 				Sender.sendMessage("Too many arguements, please retry");
 				return false;
 			} else {

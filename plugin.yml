@@ -1,7 +1,7 @@
 name: BukkitProtect
 main: io.github.elitejynx.BukkitProtect.BukkitProtect
 author: EliteJynx
-version: B-1.4
+version: A-1.5
 permissions:
   BukkitProtect.Protection.*:
     description: Gives access to all protection permissions
@@ -23,9 +23,11 @@ permissions:
     children:
       BukkitProtect.Commands.GiveRod: true
       BukkitProtect.Commands.Tag: true
-      BukkitProtect.Commands.GiveLand: true
+      BukkitProtect.Commands.AdminLand: true
+      BukkitProtect.Commands.GetLand: true
       BukkitProtect.Commands.Users: true
-      BukkitProtect.Commands.SetOwner: true
+      BukkitProtect.Commands.Transfer: true
+      BukkitProtect.Commands.Accept: true
       BukkitProtect.Commands.RemoveProtections: true
   BukkitProtect.Commands.GiveRod:
     description: Give yourself a Rod of the Admin
@@ -33,14 +35,20 @@ permissions:
   BukkitProtect.Commands.Tag:
     description: Allows players to use the add/removeTag command
     default: op
-  BukkitProtect.Commands.GiveLand:
-    description: Allows players to use the GiveLand command
+  BukkitProtect.Commands.AdminLand:
+    description: Allows players to use the land commands
     default: op
-  BukkitProtect.Commands.Users:
-    description: Allow players to use the add/removeUsers command
+  BukkitProtect.Commands.GetLand:
+    description: Allows players to use the getland command on their own land
     default: true
-  BukkitProtect.Commands.SetOwner:
-    description: Allows players to use the SetOwner command
+  BukkitProtect.Commands.Users:
+    description: Allow players to use the add/remove/getUsers command
+    default: true
+  BukkitProtect.Commands.Transfer:
+    description: Allows players to use the Transfer command
+    default: true
+  BukkitProtect.Commands.Accept:
+    description: Allows players to use the accept command
     default: true
   BukkitProtect.Commands.RemoveProtections:
     description: Allows players to use the remove(all)protection(s) commands
@@ -61,6 +69,12 @@ commands:
   SetOwner:
     description: Set a player as the owner of the selected protection
     usage: /<command> [player]
+  Transfer:
+    description: Give a player the selected protection
+    usage: /<command> [player]
+  Accept:
+    description: Accept the latest request
+    usage: /<command>
   RemoveProtection:
     description: Remove the selected protection
     usage: /<command>

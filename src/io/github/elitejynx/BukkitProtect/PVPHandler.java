@@ -19,6 +19,8 @@ import org.bukkit.event.entity.EntityDeathEvent;
 
 public class PVPHandler implements Listener {
 	public Map<Player, Integer> PVPTimers = new HashMap<Player, Integer>();
+	public Map<Player, Integer> CommandTimers = new HashMap<Player, Integer>();
+	public Map<Player, CommandRequest> CommandTrades = new HashMap<Player, CommandRequest>();
 	public Map<Player, ArrayList<Player>> PVPLogs = new HashMap<Player, ArrayList<Player>>();
 	public Map<Player, Map<Block, Integer>> UpdateBlock = new HashMap<Player, Map<Block, Integer>>();
 	public Map<Player, Map<Location, Integer>> PlayerSelection = new HashMap<Player, Map<Location, Integer>>();
@@ -63,6 +65,18 @@ public class PVPHandler implements Listener {
 					PVPTimers.remove(Plr);
 					PVPLogs.remove(Plr);
 					Plr.sendMessage("You are no longer in PVP");
+				}
+			}
+			if (CommandTimers.containsKey(Plr)) {
+				CommandTimers.put(Plr, CommandTimers.get(Plr).intValue() - 1);
+				if (CommandTimers.get(Plr).intValue() <= 0) {
+					if (CommandTimers.get(Plr).intValue() == 0)
+						Plr.sendMessage("Your command has timed out");
+					if (CommandTrades.containsKey(Plr)){
+						CommandTrades.get(Plr).getSender().sendMessage("The request has timed out");
+						CommandTrades.remove(Plr);
+					}
+					CommandTimers.remove(Plr);
 				}
 			}
 			if (UpdateBlock.containsKey(Plr)) {
