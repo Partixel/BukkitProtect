@@ -5,7 +5,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 
 public class Util {
-
 	public static UserType parseUserType(String str) {
 		for (UserType Type : BukkitProtect.Plugin.Types) {
 			if (Type.getName().equalsIgnoreCase(str)) {
