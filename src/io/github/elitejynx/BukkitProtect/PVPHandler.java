@@ -72,8 +72,9 @@ public class PVPHandler implements Listener {
 				if (CommandTimers.get(Plr).intValue() <= 0) {
 					if (CommandTimers.get(Plr).intValue() == 0)
 						Plr.sendMessage("Your command has timed out");
-					if (CommandTrades.containsKey(Plr)){
-						CommandTrades.get(Plr).getSender().sendMessage("The request has timed out");
+					if (CommandTrades.containsKey(Plr)) {
+						CommandTrades.get(Plr).getSender()
+								.sendMessage("The request has timed out");
 						CommandTrades.remove(Plr);
 					}
 					CommandTimers.remove(Plr);
@@ -230,5 +231,4 @@ public class PVPHandler implements Listener {
 		Def.add(Attacker);
 		PVPLogs.put((Player) Event.getEntity(), Def);
 	}
-
 }
