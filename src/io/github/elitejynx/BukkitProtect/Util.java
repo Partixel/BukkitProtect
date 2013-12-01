@@ -31,7 +31,7 @@ public class Util {
 	
 	public static boolean isBlockSolid(Block block) {
 		return block.getType().isOccluding() || block.getType() == Material.SOIL
-				|| block.getType() == Material.LEAVES;
+				|| block.getType() == Material.LEAVES || block.getType() == Material.SNOW;
 	}
 
 	public static Block GetHighestBlockRelative(Location loc, Location rel) {

@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bukkit.Location;
-import org.bukkit.plugin.Plugin;
 
 import com.google.common.base.Splitter;
 
@@ -44,7 +43,7 @@ public class ProtectionZone {
 		return Total;
 	}
 
-	public void fromString(String Total, Plugin pl) {
+	public ArrayList<ProtectionZone> fromString(String Total, ArrayList<ProtectionZone> Zones) {
 		String[] Splits = Total.split("\\|");
 		try {
 			Corner1 = Util.str2loc(Splits[0].trim());
@@ -76,13 +75,8 @@ public class ProtectionZone {
 			}
 		} catch (Exception e) {
 		}
-		try {
-			if (Splits[4].split("\\[")[1].split("\\]").length == 1)
-				for (String str : Splits[4].split("\\[")[1].split("\\]")[0]
-						.split(", "))
-					Tags.add(str.trim());
-		} catch (Exception e) {
-		}
+		Zones.add(this);
+		return Zones;
 	}
 
 	public Location getCorner1() {
@@ -99,6 +93,20 @@ public class ProtectionZone {
 
 	public void setCorner2(Location corner2) {
 		Corner2 = corner2;
+	}
+	
+	public int getWidth() {
+		return Math.abs(getCorner1().getBlockZ()
+				- getCorner2().getBlockZ());
+	}
+	
+	public int getLength() {
+		return Math.abs(getCorner1().getBlockX()
+				- getCorner2().getBlockX());
+	}
+	
+	public int getSize() {
+		return getWidth() * getLength();
 	}
 
 	public Map<String, ArrayList<String>> getUsers() {
@@ -166,8 +174,8 @@ public class ProtectionZone {
 		Owner = owner;
 	}
 
-	public boolean addTags(String Tag, BukkitProtect plugin) {
-		if (!Tags.contains(Tag) && plugin.Tags.containsKey(Tag)) {
+	public boolean addTags(String Tag) {
+		if (!Tags.contains(Tag) && BukkitProtect.Plugin.Tags.containsKey(Tag)) {
 			Tags.add(Tag);
 			return true;
 		}

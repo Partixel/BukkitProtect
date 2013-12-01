@@ -52,6 +52,9 @@ WitherBlockDamage: false
 WitherHeadDamageEntity: true
 WitherHeadBlockDamage: false
 
+EnderCrystalDamageEntity: true
+EnderCrystalBlockDamage: false
+
 EndermenBlockChange: false
 
 ZombiesBreakDoors: true

@@ -180,10 +180,11 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 				ArrayList<ProtectionZone> Zones = new ArrayList<ProtectionZone>();
 				for (String Zone : StringProtections.get(Player).split(" / ")) {
 					if (Zone.length() > 0) {
-						ProtectionZone newZone = new ProtectionZone(null, null,
-								null);
-						newZone.fromString(Zone, this);
-						Zones.add(newZone);
+						ArrayList<ProtectionZone> newZones = new ArrayList<ProtectionZone>();
+						new ProtectionZone(null, null,null).fromString(Zone, newZones);
+						for (ProtectionZone newZone : newZones) {
+							Zones.add(newZone);
+						}
 					}
 				}
 				Protections.put(Player, Zones);
@@ -288,26 +289,15 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 							.equalsIgnoreCase(Sender.getName())
 							|| Sender
 									.hasPermission("BukkitProtect.Protection.EditOthers")) {
-						int Length = Math
-								.abs(((ProtectionZone) PVP.PlayerSelectedZone
-										.get(Sender).keySet().toArray()[0])
-										.getCorner1().getBlockX()
-										- ((ProtectionZone) PVP.PlayerSelectedZone
-												.get(Sender).keySet().toArray()[0])
-												.getCorner2().getBlockX());
-						int Width = Math
-								.abs(((ProtectionZone) PVP.PlayerSelectedZone
-										.get(Sender).keySet().toArray()[0])
-										.getCorner1().getBlockZ()
-										- ((ProtectionZone) PVP.PlayerSelectedZone
-												.get(Sender).keySet().toArray()[0])
-												.getCorner2().getBlockZ());
 						if (getConfig().getBoolean("BuyableLand")) {
 							if (LandOwned.containsKey(Target.getName())) {
-								if ((LandOwned.get(Target.getName()) - getTotalLandUsed(Target)) < (Length * Width)) {
+								if ((LandOwned.get(Target.getName()) - getTotalLandUsed(Target)) < ((ProtectionZone) PVP.PlayerSelectedZone
+										.get(Sender).keySet().toArray()[0]).getSize() && !((ProtectionZone) PVP.PlayerSelectedZone
+										.get(Sender).keySet().toArray()[0]).hasTag("ServerOwned")) {
 									Sender.sendMessage(Target.getName()
 											+ " needs "
-											+ ((Length * Width) - (LandOwned
+											+ (((ProtectionZone) PVP.PlayerSelectedZone
+													.get(Sender).keySet().toArray()[0]).getSize() - (LandOwned
 													.get(Target.getName()) - getTotalLandUsed(Target)))
 											+ " more blocks of land to have the protection");
 									return true;
@@ -428,7 +418,8 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 													.getBlockZ());
 							if (getConfig().getBoolean("BuyableLand")) {
 								if (LandOwned.containsKey(Target.getName())) {
-									if ((LandOwned.get(Target.getName()) - getTotalLandUsed(Target)) < (Length * Width)) {
+									if ((LandOwned.get(Target.getName()) - getTotalLandUsed(Target)) < (Length * Width) && !((ProtectionZone) PVP.PlayerSelectedZone
+											.get(Sender).keySet().toArray()[0]).hasTag("ServerOwned")) {
 										Sender.sendMessage(Target.getName()
 												+ " needs "
 												+ ((Length * Width) - (LandOwned
@@ -555,7 +546,7 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 							|| Sender
 									.hasPermission("BukkitProtect.Protection.EditOthers"))
 						((ProtectionZone) PVP.PlayerSelectedZone.get(Sender)
-								.keySet().toArray()[0]).addTags(Args[0], this);
+								.keySet().toArray()[0]).addTags(Args[0]);
 				} else {
 					Sender.sendMessage("You have not selected a protection, to do this right click with a stick inside a protection");
 					return true;
@@ -569,6 +560,38 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 					String TagDesc = Tags.get(TagName);
 					Sender.sendMessage(TagName + " : " + TagDesc);
 				}
+				return false;
+			}
+		} else if (Cmd.getName().equalsIgnoreCase("gettags")) {
+			if (!(Sender instanceof Player)) {
+				Sender.sendMessage("You must be a player to use this");
+				return true;
+			}
+			if (!Sender.hasPermission("BukkitProtect.Commands.Tag")) {
+				Sender.sendMessage("You do not have permission to use this");
+				return true;
+			}
+			if (Args.length == 0) {
+				if (PVP.PlayerSelectedZone.containsKey(Sender)) {
+					if (((ProtectionZone) PVP.PlayerSelectedZone.get(Sender)
+							.keySet().toArray()[0])
+							.userHasAdminType(((Player) Sender).getName())
+							|| Sender
+									.hasPermission("BukkitProtect.Protection.EditOthers")) {
+						for (String Tag : ((ProtectionZone) PVP.PlayerSelectedZone.get(Sender)
+								.keySet().toArray()[0]).getTags()){
+							Sender.sendMessage(Tag);
+						}
+						
+					}
+				} else {
+					Sender.sendMessage("You have not selected a protection, to do this right click with a stick inside a protection");
+					return true;
+				}
+			} else if (Args.length > 0) {
+				Sender.sendMessage("Too many arguements, please retry");
+				return false;
+			} else {
 				return false;
 			}
 		} else if (Cmd.getName().equalsIgnoreCase("getusers")) {
@@ -904,20 +927,6 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 		return true;
 	}
 
-	public ProtectionZone isInsideProtection(Location Loc) {
-		if (Protections.isEmpty())
-			return null;
-		for (ArrayList<ProtectionZone> Zones : Protections.values()) {
-			for (int i = 0; i < Zones.size(); i++) {
-				if (Util.isInside(Loc, Zones.get(i).getCorner1(), Zones.get(i)
-						.getCorner2())) {
-					return Zones.get(i);
-				}
-			}
-		}
-		return null;
-	}
-
 	public int getTotalLandUsed(Player Plr) {
 		if (Protections.containsKey(Plr.getName())) {
 			ArrayList<ProtectionZone> Zones = Protections.get(Plr.getName());
@@ -936,6 +945,26 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 			return 0;
 		}
 	}
+	
+	public ProtectionZone isInsideProtection(Location Loc) {
+		if (Protections.isEmpty())
+			return null;
+		ProtectionZone Zone = null;
+		for (ArrayList<ProtectionZone> Zones : Protections.values()) {
+			for (int i = 0; i < Zones.size(); i++) {
+				if (Util.isInside(Loc, Zones.get(i).getCorner1(), Zones.get(i)
+						.getCorner2())) {
+					if (Zone == null) {
+						Zone = Zones.get(i);
+					} else if (Zones.get(i).getSize() < Zone.getSize()) {
+						Zone = Zones.get(i);
+					}
+				}
+			}
+		}
+		return Zone;
+	}
+		
 
 	public void CornerRod(Player Plr, Location blockLoc, ItemStack Rod) {
 		Block Left = Util.GetHighestBlockRelative(
@@ -957,6 +986,7 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 				.GetHighestBlockRelative(blockLoc.clone(), Plr.getLocation())
 				.getLocation().add(0, 1, 0);
 		ItemMeta RodMeta = Rod.getItemMeta();
+		boolean infinite = false;
 		if (RodMeta.getLore().get(1).split("/").length == 2) {
 			String[] Nums = RodMeta.getLore().get(1).replaceAll(" ", "")
 					.split("/");
@@ -973,6 +1003,7 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 			} else if (Num1 == -1) {
 				Plr.playEffect(EffectsLoc, Effect.ENDER_SIGNAL, 1);
 				Plr.playSound(EffectsLoc, Sound.ENDERMAN_TELEPORT, 1, 1);
+				infinite = true;
 			} else {
 				Plr.sendMessage("Your " + Rod.getItemMeta().getDisplayName()
 						+ " has broken!");
@@ -1056,7 +1087,8 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 				for (ArrayList<ProtectionZone> Zones : Protections.values()) {
 					for (ProtectionZone Zone : Zones) {
 						if (Util.zonesIntersect(newProt, Zone)) {
-							Intersecting.add(Zone);
+							if (!Zone.userHasAdminType(Plr.getName()))
+								Intersecting.add(Zone);
 						}
 					}
 				}
@@ -1068,7 +1100,7 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 					}
 				}
 				if (Intersecting.isEmpty()) {
-					if (getConfig().getBoolean("BuyableLand")) {
+					if (getConfig().getBoolean("BuyableLand") && !infinite) {
 						if (LandOwned.containsKey(Plr.getName())) {
 							int oldLength = 0;
 							int oldWidth = 0;
@@ -1119,6 +1151,8 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 							.getName());
 					if (Prots == null)
 						Prots = new ArrayList<ProtectionZone>();
+					if (infinite)
+						newProt.addTags("ServerOwned");
 					Prots.add(newProt);
 					Protections.put(Plr.getName(), Prots);
 					PVP.PlayerSelection.remove(Plr);
@@ -1619,7 +1653,7 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 				}
 			if (Event.hasBlock()) {
 				if (Event.getItem() != null) {
-					if (Event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+					if (Event.getAction() == Action.RIGHT_CLICK_BLOCK && Event.getPlayer().hasPermission("MakeProtections")) {
 						Bukkit.getServer().getScheduler()
 								.scheduleSyncDelayedTask(this, new Runnable() {
 									@Override
@@ -1938,6 +1972,9 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 			if (!getConfig().getBoolean("WitherHeadDamageEntity")
 					&& Event.getEntityType() == EntityType.WITHER_SKULL)
 				Event.setCancelled(true);
+			if (!getConfig().getBoolean("EnderCrystalDamageEntity")
+					&& Event.getEntityType() == EntityType.ENDER_CRYSTAL)
+				Event.setCancelled(true);
 		}
 		if (!(Event instanceof EntityDamageByEntityEvent))
 			return;
@@ -2080,6 +2117,9 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 			Event.setCancelled(true);
 		if (!getConfig().getBoolean("WitherHeadBlockDamage")
 				&& Event.getEntityType() == EntityType.WITHER_SKULL)
+			Event.setCancelled(true);
+		if (!getConfig().getBoolean("EnderCrystalBlockDamage")
+				&& Event.getEntityType() == EntityType.ENDER_CRYSTAL)
 			Event.setCancelled(true);
 	}
 }

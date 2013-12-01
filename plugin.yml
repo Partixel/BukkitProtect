@@ -1,14 +1,18 @@
 name: BukkitProtect
 main: io.github.elitejynx.BukkitProtect.BukkitProtect
 author: EliteJynx
-version: C-1.5
+version: A-1.6
 permissions:
   BukkitProtect.Protection.*:
     description: Gives access to all protection permissions
     children:
+      BukkitProtect.Protection.MakeProtections: true
       BukkitProtect.Protection.SelectOthers: true
       BukkitProtect.Protection.RemoveOthers: true
       BukkitProtect.Protection.EditOthers: true
+  BukkitProtect.Protection.MakeProtections:
+    description: Gives player access to selecting others regions
+    default: true
   BukkitProtect.Protection.SelectOthers:
     description: Gives player access to selecting others regions
     default: op
@@ -87,6 +91,9 @@ commands:
   RemoveTag:
     description: Remove a tag from the selected protection
     usage: /<command> [Tag]
+  GetTags:
+    description: Get tags from the selected protection
+    usage: /<command>
   GiveLand:
     description: Gives a player more land
     usage: /<command> [Player] [Int]
