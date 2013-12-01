@@ -218,10 +218,7 @@ public class ProtectionZone {
 	}
 
 	public boolean hasTag(String Tag) {
-		if (Tags.contains(Tag)) {
-			return true;
-		}
-		return false;
+		return Tags.contains(Tag);
 	}
 
 }

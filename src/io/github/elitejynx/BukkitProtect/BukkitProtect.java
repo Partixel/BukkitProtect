@@ -779,9 +779,9 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 				}
 				if (Num != 0) {
 					if (LandOwned.containsKey(Target.getName())) {
-						if (LandOwned.get(Target.getName()).intValue() - Num < 0) {
+						if (LandOwned.get(Target.getName()).intValue() + Num < 0) {
 							LandOwned.put(Target.getName(), 0);
-							Sender.sendMessage("Set targets land to 0 because the integer you specified was more then the land they owned");
+							Sender.sendMessage("Set the targets land to 0 because the integer you specified was more then the land they owned");
 						} else {
 						LandOwned.put(Target.getName(), LandOwned.get(Target.getName()).intValue() + Num);
 						}

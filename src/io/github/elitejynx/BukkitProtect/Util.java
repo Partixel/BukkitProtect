@@ -38,26 +38,30 @@ public class Util {
 				+ loc.getBlockY() + ":" + loc.getBlockZ();
 
 	}
+	
+	public static boolean isBlockSolid(Block block) {
+		return block.getType().isOccluding() || block.getType() == Material.SOIL
+				|| block.getType() == Material.LEAVES;
+	}
 
 	public static Block GetHighestBlockRelative(Location loc, Location rel) {
 		loc.setY(rel.getY());
 		Block Use = loc.getWorld().getBlockAt(loc);
-		if (Use.getType().isOccluding() || Use.getType() == Material.SOIL
-				|| Use.getType() == Material.SNOW || Use.isLiquid()
-				|| Use.getType() == Material.LEAVES) {
-			while (Use.getType().isOccluding()
-					|| Use.getType() == Material.SOIL
-					|| Use.getType() == Material.SNOW || Use.isLiquid()
-					|| Use.getType() == Material.LEAVES
-					|| loc.getBlockY() > loc.getWorld().getMaxHeight()) {
-				Use = loc.getWorld().getBlockAt(loc.add(0, 1, 0));
+		if (isBlockSolid(Use) || Use.isLiquid()) {
+			if (Use.isLiquid()) {
+				while (Use.isLiquid() && loc.getBlockY() > 0) {
+					Use = loc.getWorld().getBlockAt(loc.add(0, -1, 0));
+				}
+
+				return loc.getWorld().getBlockAt(loc);
+			} else {
+				while (isBlockSolid(Use) || loc.getBlockY() > loc.getWorld().getMaxHeight()) {
+					Use = loc.getWorld().getBlockAt(loc.add(0, 1, 0));
+				}
+				return loc.getWorld().getBlockAt(loc.add(0, -1, 0));
 			}
-			return loc.getWorld().getBlockAt(loc.add(0, -1, 0));
 		} else {
-			while (!Use.getType().isOccluding()
-					&& Use.getType() != Material.SOIL
-					&& Use.getType() != Material.SNOW && !Use.isLiquid()
-					&& Use.getType() != Material.LEAVES && loc.getBlockY() > 0) {
+			while (!isBlockSolid(Use) && !Use.isLiquid() && loc.getBlockY() > 0) {
 				Use = loc.getWorld().getBlockAt(loc.add(0, -1, 0));
 			}
 			return loc.getWorld().getBlockAt(loc);
