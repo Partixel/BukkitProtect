@@ -112,8 +112,7 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 		Rod.setItemMeta(RodMeta);
 		Rod.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, Level);
 		if (baseMaterial != null) {
-			ShapedRecipe RodRecipe = new ShapedRecipe(new ItemStack(
-					baseRod.getType()));
+			ShapedRecipe RodRecipe = new ShapedRecipe(Rod);
 			RodRecipe.shape(" GG", " SG", "C  ");
 			RodRecipe.setIngredient('G', Material.GLASS);
 			RodRecipe.setIngredient('S', baseRod.getType());
@@ -1633,19 +1632,21 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 															.getLore()
 															.get(0)
 															.equals("Protect your land")) {
-												if (Rod.getAmount() > 1) {
-													Event.getPlayer()
-															.sendMessage(
-																	"You must not have more then one "
-																			+ Rod.getItemMeta()
-																					.getDisplayName()
-																			+ " in a stack");
-													return;
+												if (Event.getPlayer().isSneaking()) {
+													if (Rod.getAmount() > 1) {
+														Event.getPlayer()
+																.sendMessage(
+																		"You must not have more then one "
+																				+ Rod.getItemMeta()
+																						.getDisplayName()
+																				+ " in a stack");
+														return;
+													}
+													CornerRod(Event.getPlayer(),
+															Event.getClickedBlock()
+																	.getLocation(),
+															Rod);
 												}
-												CornerRod(Event.getPlayer(),
-														Event.getClickedBlock()
-																.getLocation(),
-														Rod);
 											} else {
 												DisplayProtection(Event
 														.getPlayer(), Event
