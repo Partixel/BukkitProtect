@@ -75,6 +75,12 @@ public class ProtectionZone {
 			}
 		} catch (Exception e) {
 		}
+		try {
+			if (Splits[4].split("\\[")[1].split("\\]").length == 1)
+				for (String str : Splits[4].split("\\[")[1].split("\\]")[0].split(", "))
+					Tags.add(str.trim());
+		} catch (Exception e) {
+		}
 		Zones.add(this);
 		return Zones;
 	}
