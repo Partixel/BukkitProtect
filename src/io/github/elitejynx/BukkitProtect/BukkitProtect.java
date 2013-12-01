@@ -234,7 +234,7 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 		oos.flush();
 		oos.close();
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	public static <T extends Object> T load(String path) throws Exception {
 		ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path));
