@@ -33,6 +33,7 @@ permissions:
       BukkitProtect.Commands.Transfer: true
       BukkitProtect.Commands.Accept: true
       BukkitProtect.Commands.RemoveProtections: true
+      BukkitProtect.Commands.Stuck: true
   BukkitProtect.Commands.GiveRod:
     description: Give yourself a Rod of the Admin
     default: op
@@ -56,6 +57,9 @@ permissions:
     default: true
   BukkitProtect.Commands.RemoveProtections:
     description: Allows players to use the remove(all)protection(s) commands
+    default: true
+  BukkitProtect.Commands.Stuck:
+    description: Allows players to use the Stuck command
     default: true
 commands:
   GiveRod:
@@ -84,7 +88,7 @@ commands:
     usage: /<command>
   RemoveAllProtections:
     description: Remove all your protection
-    usage: /<command>
+    usage: /<command> [player]
   AddTag:
     description: Add a tag to the selected protection
     usage: /<command> [Tag]
@@ -103,3 +107,6 @@ commands:
   GetLand:
     description: Gets a players land
     usage: /<command> [Player]
+  Stuck:
+    description: Teleports a player out of a protection
+    usage: /<command>

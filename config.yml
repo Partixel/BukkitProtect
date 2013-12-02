@@ -30,6 +30,9 @@ PlayersTrampleCrops: true
 
 PlayersCanCreatePortals: true
 
+PreventPVPLog: true
+PreventPVPTeleport: true
+
 # Entity
 
 EntitiesTrampleCrops: false

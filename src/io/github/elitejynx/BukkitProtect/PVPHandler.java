@@ -17,6 +17,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 
 public class PVPHandler implements Listener {
 	public Map<Player, Integer> CommandTimers = new HashMap<Player, Integer>();
@@ -189,12 +192,39 @@ public class PVPHandler implements Listener {
 			}
 		}
 	}
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void PlayerTeleport(PlayerTeleportEvent Event) {
+		if (Event.getPlayer() == null)
+			return;
+		if (!BukkitProtect.Plugin.getConfig().getBoolean("PreventPVPTeleport"))
+			return;
+		if (Event.getCause() == TeleportCause.PLUGIN || Event.getCause() == TeleportCause.COMMAND) {
+			if (isPlayerInPVP(Event.getPlayer())) {
+				Event.setCancelled(true);
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void PlayerLogout(PlayerQuitEvent Event) {
+		if (Event.getPlayer() == null)
+			return;
+		if (!BukkitProtect.Plugin.getConfig().getBoolean("PreventPVPLog"))
+			return;
+		if (isPlayerInPVP(Event.getPlayer())){
+			Event.getPlayer().setHealth(0);
+			Event.setQuitMessage(Event.getPlayer().getDisplayName() + " has been killed for PVP logging");
+		}
+	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void DamageEntity(EntityDamageByEntityEvent Event) {
 		if (Event.getEntity() == null || Event.getDamager() == null)
 			return;
 		if (!(Event.getEntity() instanceof Player))
+			return;
+		if (Event.getDamage() <= 0 || Event.isCancelled())
 			return;
 		if (Event.getCause() == DamageCause.THORNS)
 			return;

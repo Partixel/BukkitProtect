@@ -785,7 +785,22 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 					Sender.sendMessage("Say the command again within 10 seconds to accept");
 					return true;
 				}
-			} else if (Args.length > 0) {
+			} else if (Args.length == 1) {
+				if (Bukkit.getPlayer(Args[0]) == null) {
+					Sender.sendMessage("Could not find that player");
+					return true;
+				}
+				if (PVP.CommandTimers.containsKey(Sender)) {
+					Protections.remove(Bukkit.getPlayer(Args[0]).getName());
+					PVP.updateFakeBlocks((Player) Sender);
+					PVP.CommandTimers.put((Player) Sender, -1);
+					return true;
+				} else {
+					PVP.CommandTimers.put((Player) Sender, 10);
+					Sender.sendMessage("Say the command again within 10 seconds to accept");
+					return true;
+				}
+			} else if (Args.length > 1) {
 				Sender.sendMessage("Too many arguements, please retry");
 				return false;
 			} else {
@@ -830,7 +845,30 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 				return false;
 			} else {
 				return false;
-			}
+			}} else if (Cmd.getName().equalsIgnoreCase("stuck")) {
+				if (!(Sender instanceof Player)) {
+					Sender.sendMessage("You must be a player to use this");
+					return true;
+				}
+				if (!Sender.hasPermission("BukkitProtect.Commands.Stuck")) {
+					Sender.sendMessage("You do not have permission to use this");
+					return true;
+				}
+				if (Args.length == 0) {
+					ProtectionZone Zone = isInsideProtection(((Player) Sender).getLocation());
+					if (Zone != null) {
+						if (Zone.userHasType(Sender.getName(), UTBuildBlocks)) {
+							Sender.sendMessage("You can build or break blocks to leave this protection");
+						} else {
+							((Player) Sender).teleport(((Player) Sender).getWorld().getHighestBlockAt(Zone.getCorner1()).getLocation());
+						}
+					}
+				} else if (Args.length > 0) {
+					Sender.sendMessage("Too many arguements, please retry");
+					return false;
+				} else {
+					return false;
+				}
 		} else if (Cmd.getName().equalsIgnoreCase("setland")) {
 			if (!(Sender instanceof Player)) {
 				Sender.sendMessage("You must be a player to use this");
