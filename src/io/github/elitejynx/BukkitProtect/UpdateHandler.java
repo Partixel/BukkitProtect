@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -470,73 +471,62 @@ public class UpdateHandler {
 																	// number
 				char[] remoteChars = remoteVersion.toCharArray();
 				char[] localChars = version.toCharArray();
-				float remoteValue = 0;
 				float remoteLetterValue = 0;
-				float localValue = 0;
 				float localLetterValue = 0;
 
-				String NumChain = "";
+				ArrayList<Integer> remoteInts = new ArrayList<Integer>();
+				ArrayList<Integer> localInts = new ArrayList<Integer>();
 
 				for (char c : remoteChars) {
 					try {
-						Integer.parseInt(c + "");
-						NumChain = NumChain + c;
+						remoteInts.add(
+								Integer.parseInt(c + ""));
 					} catch (Exception e) {
-						if (NumChain != "") {
-							if (c == '.') {
-								NumChain = NumChain + c;
-							} else {
-								try {
-									float Num = Float.parseFloat(NumChain);
-									remoteValue = remoteValue + Num;
-								} catch (Exception ex) {
-								}
-							}
-						} else {
-							remoteLetterValue = remoteLetterValue
-									+ (c + "").getBytes()[0];
-						}
+						remoteLetterValue = remoteLetterValue
+								+ (c + "").getBytes()[0];
 					}
 				}
-				if (NumChain != "") {
-					try {
-						float Num = Float.parseFloat(NumChain);
-						remoteValue = remoteValue + Num;
-					} catch (Exception ex) {
-					}
-				}
-
-				NumChain = "";
 
 				for (char c : localChars) {
 					try {
-						Integer.parseInt(c + "");
-						NumChain = NumChain + c;
+						localInts.add(
+								Integer.parseInt(c + ""));
 					} catch (Exception e) {
-						if (NumChain != "") {
-							if (c == '.') {
-								NumChain = NumChain + c;
-							} else {
-								try {
-									float Num = Float.parseFloat(NumChain);
-									localValue = localValue + Num;
-								} catch (Exception ex) {
-								}
-							}
-						} else {
-							localLetterValue = localLetterValue
-									+ (c + "").getBytes()[0];
-						}
+						localLetterValue = localLetterValue
+								+ (c + "").getBytes()[0];
 					}
 				}
-
-				if (NumChain != "") {
-					try {
-						float Num = Float.parseFloat(NumChain);
-						localValue = localValue + Num;
-					} catch (Exception ex) {
+				
+				String tempValue = "";
+				
+				float remoteValue = 0;
+				float localValue = 0;
+				
+				for (Integer Int : remoteInts) {
+					if (tempValue == "") {
+						tempValue = Int + ".";
+					} else {
+						tempValue = tempValue + Int;
 					}
 				}
+				
+				try {
+				remoteValue = Float.parseFloat(tempValue);
+				} catch (Exception e) {}
+				
+				tempValue = "";
+				
+				for (Integer Int : localInts) {
+					if (tempValue == "") {
+						tempValue = Int + ".";
+					} else {
+						tempValue = tempValue + Int;
+					}
+				}
+				
+				try {
+				localValue = Float.parseFloat(tempValue);
+				} catch (Exception e) {}
 
 				// Check versions
 				if (remoteValue < localValue) {

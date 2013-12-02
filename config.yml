@@ -4,14 +4,14 @@ AutoUpdate: true
 
 # Protection
 
-MinimumZoneSize: 10
+MinimumZoneSize: 5
 
 ProtectChests: true #If a player places a chest and has no protections, a new one is created around the chest
 
 # Land
 
 BuyableLand: true
-StartLand: 100 # Width X Length ( 10 x 10 )
+StartLand: 100 # Width X Length ( 10 x 10 ) (Must be a square number)
 
 LandGain: 20 #The amount you gain
 LandDelay: 1200 #The delay between each gain of land

@@ -15,21 +15,28 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
 
 public class PVPHandler implements Listener {
 	public Map<Player, Integer> CommandTimers = new HashMap<Player, Integer>();
 	public Map<Player, CommandRequest> CommandTrades = new HashMap<Player, CommandRequest>();
-	public Map<Player, Integer> PVPTimers = new HashMap<Player, Integer>();
-	public Map<Player, ArrayList<Player>> PVPLogs = new HashMap<Player, ArrayList<Player>>();
-	/**TODO
-	 * Combine PVPTimers/Logs into one
-	 */
+	public Map<Player, PVPLog> PVPLogs = new HashMap<Player, PVPLog>();
 	public Map<Player, Map<Block, Integer>> UpdateBlock = new HashMap<Player, Map<Block, Integer>>();
 	public Map<Player, Map<Location, Integer>> PlayerSelection = new HashMap<Player, Map<Location, Integer>>();
 	public Map<Player, Map<ProtectionZone, Integer>> PlayerSelectedZone = new HashMap<Player, Map<ProtectionZone, Integer>>();
 	public Map<Player, Integer> PlayerGain = new HashMap<Player, Integer>();
-
+	
+	public void updateFakeBlocks(Player Plr) {
+		if (UpdateBlock.containsKey(Plr)) {
+			Map<Block, Integer> Blocks = UpdateBlock.get(Plr);
+			for (Block block : Blocks.keySet()) {
+				Blocks.put(block, 0);
+			}
+			UpdateBlock.put(Plr, Blocks);
+		}
+	}
+	
 	public PVPHandler(final BukkitProtect main) {
 		Bukkit.getServer().getScheduler()
 				.scheduleSyncRepeatingTask(main, new Runnable() {
@@ -62,10 +69,9 @@ public class PVPHandler implements Listener {
 			} else {
 				PlayerGain.put(Plr, main.getConfig().getInt("LandDelay"));
 			}
-			if (PVPTimers.containsKey(Plr)) {
-				PVPTimers.put(Plr, PVPTimers.get(Plr).intValue() - 1);
-				if (PVPTimers.get(Plr).intValue() <= 0) {
-					PVPTimers.remove(Plr);
+			if (PVPLogs.containsKey(Plr)) {
+				PVPLogs.get(Plr).changeTimer(-1);
+				if (PVPLogs.get(Plr).getTimer() <= 0) {
 					PVPLogs.remove(Plr);
 					Plr.sendMessage("You are no longer in PVP");
 				}
@@ -149,35 +155,33 @@ public class PVPHandler implements Listener {
 	}
 
 	public boolean isPlayerInPVP(Player plr) {
-		return PVPTimers.containsKey(plr);
+		return PVPLogs.containsKey(plr);
 	}
 
 	public boolean isPlayerInPVPWith(Player plr, Player att) {
-		if (PVPTimers.containsKey(plr)) {
-			return PVPLogs.get(plr).contains(att);
+		if (PVPLogs.containsKey(plr)) {
+			return PVPLogs.get(plr).getPlrs().contains(att);
 		}
 		return false;
 	}
 
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.MONITOR)
 	public void PlayerDied(EntityDeathEvent Event) {
 		if (Event.getEntity() == null)
 			return;
 		if (!(Event.getEntity() instanceof Player))
 			return;
-		if (PVPTimers.containsKey(Event.getEntity())) {
-			PVPTimers.remove(Event.getEntity());
-			if (!PVPLogs.isEmpty() && PVPLogs.containsKey(Event.getEntity())) {
-				for (Player plr : PVPLogs.get(Event.getEntity())) {
+		if (PVPLogs.containsKey(Event.getEntity())) {
+			if (!PVPLogs.get(Event.getEntity()).getPlrs().isEmpty()) {
+				for (Player plr : PVPLogs.get(Event.getEntity()).getPlrs()) {
 					if (PVPLogs.containsKey(plr)) {
-						ArrayList<Player> PLog = PVPLogs.get(plr);
-						PLog.remove(Event.getEntity());
-						if (PLog.isEmpty()) {
+						PVPLog PVPlog = PVPLogs.get(plr);
+						PVPlog.removePlrs((Player) Event.getEntity());
+						if (PVPlog.getPlrs().isEmpty()) {
 							PVPLogs.remove(plr);
-							PVPTimers.remove(plr);
 							plr.sendMessage("You are no longer in PVP");
 						} else {
-							PVPLogs.put(plr, PLog);
+							PVPLogs.put(plr, PVPlog);
 						}
 					}
 				}
@@ -186,13 +190,13 @@ public class PVPHandler implements Listener {
 		}
 	}
 
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.MONITOR)
 	public void DamageEntity(EntityDamageByEntityEvent Event) {
 		if (Event.getEntity() == null || Event.getDamager() == null)
 			return;
 		if (!(Event.getEntity() instanceof Player))
 			return;
-		if (((Player) Event.getEntity()).getHealth() <= 0)
+		if (Event.getCause() == DamageCause.THORNS)
 			return;
 		Player Attacker = null;
 		if (Event.getDamager() instanceof Player)
@@ -211,27 +215,25 @@ public class PVPHandler implements Listener {
 			}
 		if (Attacker == null)
 			return;
-		if (!PVPTimers.containsKey(Attacker))
-			Attacker.sendMessage("You have entered PVP");
-		if (!PVPTimers.containsKey(Event.getEntity()))
-			((Player) Event.getEntity()).sendMessage("You have entered PVP");
-		PVPTimers.put(Attacker, 120);
-		ArrayList<Player> Atts;
+		PVPLog AttLog = new PVPLog(new ArrayList<Player>(), 120);
+		PVPLog DefLog = new PVPLog(new ArrayList<Player>(), 120);
 		if (!PVPLogs.containsKey(Attacker)) {
-			Atts = new ArrayList<Player>();
+			Attacker.sendMessage("You have entered PVP");
 		} else {
-			Atts = PVPLogs.get(Attacker);
+			AttLog = PVPLogs.get(Attacker);
 		}
-		Atts.add((Player) Event.getEntity());
-		PVPLogs.put(Attacker, Atts);
-		PVPTimers.put((Player) Event.getEntity(), 120);
-		ArrayList<Player> Def;
+		AttLog.addPlrs((Player) Event.getEntity());
+		AttLog.setTimer(120);
+		
 		if (!PVPLogs.containsKey(Event.getEntity())) {
-			Def = new ArrayList<Player>();
+			((Player) Event.getEntity()).sendMessage("You have entered PVP");
 		} else {
-			Def = PVPLogs.get(Event.getEntity());
+			DefLog = PVPLogs.get(Event.getEntity());
 		}
-		Def.add(Attacker);
-		PVPLogs.put((Player) Event.getEntity(), Def);
+		DefLog.addPlrs(Attacker);
+		DefLog.setTimer(120);
+		
+		PVPLogs.put(Attacker, AttLog);
+		PVPLogs.put((Player) Event.getEntity(), DefLog);
 	}
 }

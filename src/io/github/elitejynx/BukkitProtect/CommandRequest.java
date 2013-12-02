@@ -4,11 +4,12 @@ import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 
 public class CommandRequest {
-	Player Sender;
-	Player Target;
-	boolean Accepted;
-	Command Command;
-	String[] Args;
+	
+	private Player Sender;
+	private Player Target;
+	private boolean Accepted;
+	private Command Command;
+	private String[] Args;
 
 	public CommandRequest(Player sender, Player target, boolean accepted,
 			Command command, String[] args) {
