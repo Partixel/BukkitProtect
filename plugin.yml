@@ -1,7 +1,7 @@
 name: BukkitProtect
 main: io.github.elitejynx.BukkitProtect.BukkitProtect
 author: EliteJynx
-version: B-1.6
+version: C-1.6
 permissions:
   BukkitProtect.Protection.*:
     description: Gives access to all protection permissions
