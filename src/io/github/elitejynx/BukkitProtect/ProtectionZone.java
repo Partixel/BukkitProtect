@@ -43,7 +43,8 @@ public class ProtectionZone {
 		return Total;
 	}
 
-	public ArrayList<ProtectionZone> fromString(String Total, ArrayList<ProtectionZone> Zones) {
+	public ArrayList<ProtectionZone> fromString(String Total,
+			ArrayList<ProtectionZone> Zones) {
 		String[] Splits = Total.split("\\|");
 		try {
 			Corner1 = Util.str2loc(Splits[0].trim());
@@ -58,14 +59,17 @@ public class ProtectionZone {
 		} catch (Exception e) {
 		}
 		try {
-			if (Splits[3].split("\\{")[1].split("\\}").length == 1){
-				Map<String, String> StringUsers = Splitter.on("], ").withKeyValueSeparator("=").split(Splits[3].split("\\{")[1].split("\\}")[0]);
+			if (Splits[3].split("\\{")[1].split("\\}").length == 1) {
+				Map<String, String> StringUsers = Splitter.on("], ")
+						.withKeyValueSeparator("=")
+						.split(Splits[3].split("\\{")[1].split("\\}")[0]);
 				for (String plr : StringUsers.keySet()) {
 					ArrayList<String> ListUsers = new ArrayList<String>();
 					String str = StringUsers.get(plr);
 					try {
 						if (str.split("\\[")[1].split("\\]").length == 1)
-							for (String str2 : str.split("\\[")[1].split("\\]")[0].split(", ")){
+							for (String str2 : str.split("\\[")[1].split("\\]")[0]
+									.split(", ")) {
 								ListUsers.add(str2.trim());
 							}
 					} catch (Exception e) {
@@ -77,7 +81,8 @@ public class ProtectionZone {
 		}
 		try {
 			if (Splits[4].split("\\[")[1].split("\\]").length == 1)
-				for (String str : Splits[4].split("\\[")[1].split("\\]")[0].split(", "))
+				for (String str : Splits[4].split("\\[")[1].split("\\]")[0]
+						.split(", "))
 					Tags.add(str.trim());
 		} catch (Exception e) {
 		}
@@ -100,17 +105,15 @@ public class ProtectionZone {
 	public void setCorner2(Location corner2) {
 		Corner2 = corner2;
 	}
-	
+
 	public int getWidth() {
-		return Math.abs(getCorner1().getBlockZ()
-				- getCorner2().getBlockZ());
+		return Math.abs(getCorner1().getBlockZ() - getCorner2().getBlockZ());
 	}
-	
+
 	public int getLength() {
-		return Math.abs(getCorner1().getBlockX()
-				- getCorner2().getBlockX());
+		return Math.abs(getCorner1().getBlockX() - getCorner2().getBlockX());
 	}
-	
+
 	public int getSize() {
 		return getWidth() * getLength();
 	}
@@ -181,15 +184,15 @@ public class ProtectionZone {
 	}
 
 	public boolean addTags(String Tag) {
-		if (!Tags.contains(Tag) && BukkitProtect.Plugin.Tags.containsKey(Tag)) {
-			Tags.add(Tag);
+		if (Util.isTag(Tag) != null && !hasTag(Tag)) {
+			Tags.add(Util.isTag(Tag));
 			return true;
 		}
 		return false;
 	}
 
 	public boolean removeTags(String Tag) {
-		if (Tags.contains(Tag)) {
+		if (!hasTag(Tag)) {
 			Tags.remove(Tag);
 			return true;
 		}
@@ -203,9 +206,9 @@ public class ProtectionZone {
 	public void setTags(ArrayList<String> tags) {
 		Tags = tags;
 	}
-	
+
 	public boolean userHasAdminType(String Plr) {
-		if (Owner.equalsIgnoreCase(Plr)){
+		if (Owner.equalsIgnoreCase(Plr)) {
 			return true;
 		} else if (Users.containsKey(Plr)) {
 			for (String str : Users.get(Plr)) {
@@ -232,7 +235,7 @@ public class ProtectionZone {
 	}
 
 	public boolean hasTag(String Tag) {
-		return Tags.contains(Tag);
+		return Tags.contains(Util.isTag(Tag));
 	}
 
 }

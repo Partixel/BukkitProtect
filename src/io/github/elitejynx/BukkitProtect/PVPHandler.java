@@ -29,7 +29,7 @@ public class PVPHandler implements Listener {
 	public Map<Player, Map<Location, Integer>> PlayerSelection = new HashMap<Player, Map<Location, Integer>>();
 	public Map<Player, Map<ProtectionZone, Integer>> PlayerSelectedZone = new HashMap<Player, Map<ProtectionZone, Integer>>();
 	public Map<Player, Integer> PlayerGain = new HashMap<Player, Integer>();
-	
+
 	public void updateFakeBlocks(Player Plr) {
 		if (UpdateBlock.containsKey(Plr)) {
 			Map<Block, Integer> Blocks = UpdateBlock.get(Plr);
@@ -39,7 +39,7 @@ public class PVPHandler implements Listener {
 			UpdateBlock.put(Plr, Blocks);
 		}
 	}
-	
+
 	public PVPHandler(final BukkitProtect main) {
 		Bukkit.getServer().getScheduler()
 				.scheduleSyncRepeatingTask(main, new Runnable() {
@@ -168,7 +168,7 @@ public class PVPHandler implements Listener {
 		return false;
 	}
 
-	@EventHandler(priority = EventPriority.MONITOR)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void PlayerDied(EntityDeathEvent Event) {
 		if (Event.getEntity() == null)
 			return;
@@ -192,39 +192,42 @@ public class PVPHandler implements Listener {
 			}
 		}
 	}
-	
-	@EventHandler(priority = EventPriority.LOWEST)
+
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void PlayerTeleport(PlayerTeleportEvent Event) {
 		if (Event.getPlayer() == null)
 			return;
 		if (!BukkitProtect.Plugin.getConfig().getBoolean("PreventPVPTeleport"))
 			return;
-		if (Event.getCause() == TeleportCause.PLUGIN || Event.getCause() == TeleportCause.COMMAND) {
+		if (Event.getCause() == TeleportCause.PLUGIN
+				|| Event.getCause() == TeleportCause.COMMAND) {
 			if (isPlayerInPVP(Event.getPlayer())) {
 				Event.setCancelled(true);
+				Event.getPlayer().sendMessage("You cannot teleport in PVP");
 			}
 		}
 	}
-	
-	@EventHandler(priority = EventPriority.LOWEST)
+
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void PlayerLogout(PlayerQuitEvent Event) {
 		if (Event.getPlayer() == null)
 			return;
 		if (!BukkitProtect.Plugin.getConfig().getBoolean("PreventPVPLog"))
 			return;
-		if (isPlayerInPVP(Event.getPlayer())){
+		if (isPlayerInPVP(Event.getPlayer())) {
 			Event.getPlayer().setHealth(0);
-			Event.setQuitMessage(Event.getPlayer().getDisplayName() + " has been killed for PVP logging");
+			Event.setQuitMessage(Event.getPlayer().getDisplayName()
+					+ " has been killed for PVP logging");
 		}
 	}
 
-	@EventHandler(priority = EventPriority.MONITOR)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void DamageEntity(EntityDamageByEntityEvent Event) {
 		if (Event.getEntity() == null || Event.getDamager() == null)
 			return;
 		if (!(Event.getEntity() instanceof Player))
 			return;
-		if (Event.getDamage() <= 0 || Event.isCancelled())
+		if (Event.getDamage() <= 0)
 			return;
 		if (Event.getCause() == DamageCause.THORNS)
 			return;
@@ -254,7 +257,7 @@ public class PVPHandler implements Listener {
 		}
 		AttLog.addPlrs((Player) Event.getEntity());
 		AttLog.setTimer(120);
-		
+
 		if (!PVPLogs.containsKey(Event.getEntity())) {
 			((Player) Event.getEntity()).sendMessage("You have entered PVP");
 		} else {
@@ -262,7 +265,7 @@ public class PVPHandler implements Listener {
 		}
 		DefLog.addPlrs(Attacker);
 		DefLog.setTimer(120);
-		
+
 		PVPLogs.put(Attacker, AttLog);
 		PVPLogs.put((Player) Event.getEntity(), DefLog);
 	}

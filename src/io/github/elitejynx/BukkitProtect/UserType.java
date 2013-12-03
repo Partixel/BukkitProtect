@@ -12,26 +12,37 @@ public class UserType {
 
 	/**
 	 * 
-	 * @param name - The name of the UserType
-	 * @param desc - The description of the UserType
-	 * @param display - The material the UserType will be
-	 * @param priority - The priority of the UserType during display - 5 for highest, 1 for lowest - 0 won't show
-	 * @param admin - Whether or not the UserType will allow access to commands
+	 * @param name
+	 *            - The name of the UserType
+	 * @param desc
+	 *            - The description of the UserType
+	 * @param display
+	 *            - The material the UserType will be
+	 * @param priority
+	 *            - The priority of the UserType during display - 5 for highest,
+	 *            1 for lowest - 0 won't show
+	 * @param admin
+	 *            - Whether or not the UserType will allow access to commands
 	 */
-	public UserType(String name, String desc, Material display, int priority, boolean admin) {
+	public UserType(String name, String desc, Material display, int priority,
+			boolean admin) {
 		this.setName(name);
 		this.setDesc(desc);
 		this.setDisplay(display);
 		this.setPriority(priority);
 		this.setAdmin(admin);
 	}
-	
+
 	/**
 	 * 
-	 * @param name - The name of the UserType
-	 * @param desc - The description of the UserType
-	 * @param priority - The priority of the UserType - 5 for highest, 1 for lowest
-	 * @param admin - Whether or not the UserType will allow access to commands
+	 * @param name
+	 *            - The name of the UserType
+	 * @param desc
+	 *            - The description of the UserType
+	 * @param priority
+	 *            - The priority of the UserType - 5 for highest, 1 for lowest
+	 * @param admin
+	 *            - Whether or not the UserType will allow access to commands
 	 */
 	public UserType(String name, String desc, int priority, boolean admin) {
 		this.setName(name);

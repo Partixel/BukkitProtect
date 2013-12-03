@@ -4,7 +4,7 @@ import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 
 public class CommandRequest {
-	
+
 	private Player Sender;
 	private Player Target;
 	private boolean Accepted;

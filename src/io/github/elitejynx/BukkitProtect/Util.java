@@ -14,6 +14,15 @@ public class Util {
 		return null;
 	}
 
+	public static String isTag(String str) {
+		for (String Str : BukkitProtect.Plugin.Tags.keySet()) {
+			if (Str.equalsIgnoreCase(str)) {
+				return Str;
+			}
+		}
+		return null;
+	}
+
 	public static Location str2loc(String str) {
 		String str2loc[] = str.split("\\:");
 		Location loc = new Location(BukkitProtect.Plugin.getServer().getWorld(
@@ -28,14 +37,17 @@ public class Util {
 		return loc.getWorld().getName() + ":" + loc.getBlockX() + ":"
 				+ loc.getBlockY() + ":" + loc.getBlockZ();
 	}
-	
+
 	public static boolean isBlockSolid(Block block) {
-		return block.getType().isOccluding() || block.getType() == Material.SOIL
-				|| block.getType() == Material.LEAVES || block.getType() == Material.SNOW
-				|| block.getType() == Material.STAINED_GLASS || block.getType() == Material.STAINED_GLASS_PANE
+		return block.getType().isOccluding()
+				|| block.getType() == Material.SOIL
+				|| block.getType() == Material.LEAVES
+				|| block.getType() == Material.SNOW
+				|| block.getType() == Material.STAINED_GLASS
+				|| block.getType() == Material.STAINED_GLASS_PANE
 				|| block.getType() == Material.GLASS;
 	}
-	
+
 	public static Block GetLowestBlockRelative(Location Loc, Location rLoc) {
 		Location loc = Loc.clone();
 		Location rloc = rLoc.clone();
@@ -50,7 +62,7 @@ public class Util {
 			return loc.getWorld().getBlockAt(loc);
 		}
 	}
-	
+
 	public static Block GetLowestBlock(Location Loc) {
 		Location loc = Loc.clone();
 		Block Use = loc.getWorld().getBlockAt(loc);
@@ -64,7 +76,8 @@ public class Util {
 		}
 	}
 
-	public static Boolean isInsideY(Location Loc, Location Corner1, Location Corner2) {
+	public static Boolean isInsideY(Location Loc, Location Corner1,
+			Location Corner2) {
 		Location loc = Loc.clone();
 		Location corner1 = Corner1.clone();
 		Location corner2 = Corner2.clone();
@@ -85,8 +98,9 @@ public class Util {
 		yMax = Math.max(corner1.getY(), corner2.getY());
 		return (x >= xMin && x <= xMax && z >= zMin && z <= zMax && y >= yMin && y <= yMax);
 	}
-	
-	public static Boolean isInside(Location Loc, Location Corner1, Location Corner2) {
+
+	public static Boolean isInside(Location Loc, Location Corner1,
+			Location Corner2) {
 		Location loc = Loc.clone();
 		Location corner1 = Corner1.clone();
 		Location corner2 = Corner2.clone();
@@ -102,7 +116,7 @@ public class Util {
 		zMax = Math.max(corner1.getZ(), corner2.getZ());
 		return (x >= xMin && x <= xMax && z >= zMin && z <= zMax);
 	}
-	
+
 	public static Boolean zonesIntersectY(ProtectionZone Zone1,
 			ProtectionZone Zone2) {
 		Location Corner1 = Zone1.getCorner1().clone();
@@ -121,7 +135,8 @@ public class Util {
 		int MinZ2 = Math.min(Corner3.getBlockZ(), Corner4.getBlockZ());
 		int MaxY2 = Math.max(Corner3.getBlockY(), Corner4.getBlockY());
 		int MinY2 = Math.min(Corner3.getBlockY(), Corner4.getBlockY());
-		return (MaxX1 >= MinX2 && MinX1 <= MaxX2 && MaxZ1 >= MinZ2 && MinZ1 <= MaxZ2 && MaxY1 >= MinY2 && MinY1 <= MaxY2);
+		return (MaxX1 >= MinX2 && MinX1 <= MaxX2 && MaxZ1 >= MinZ2
+				&& MinZ1 <= MaxZ2 && MaxY1 >= MinY2 && MinY1 <= MaxY2);
 	}
 
 	public static Boolean zonesIntersect(ProtectionZone Zone1,

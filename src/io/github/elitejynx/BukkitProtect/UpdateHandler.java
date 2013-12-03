@@ -479,8 +479,7 @@ public class UpdateHandler {
 
 				for (char c : remoteChars) {
 					try {
-						remoteInts.add(
-								Integer.parseInt(c + ""));
+						remoteInts.add(Integer.parseInt(c + ""));
 					} catch (Exception e) {
 						remoteLetterValue = remoteLetterValue
 								+ (c + "").getBytes()[0];
@@ -489,19 +488,18 @@ public class UpdateHandler {
 
 				for (char c : localChars) {
 					try {
-						localInts.add(
-								Integer.parseInt(c + ""));
+						localInts.add(Integer.parseInt(c + ""));
 					} catch (Exception e) {
 						localLetterValue = localLetterValue
 								+ (c + "").getBytes()[0];
 					}
 				}
-				
+
 				String tempValue = "";
-				
+
 				float remoteValue = 0;
 				float localValue = 0;
-				
+
 				for (Integer Int : remoteInts) {
 					if (tempValue == "") {
 						tempValue = Int + ".";
@@ -509,13 +507,14 @@ public class UpdateHandler {
 						tempValue = tempValue + Int;
 					}
 				}
-				
+
 				try {
-				remoteValue = Float.parseFloat(tempValue);
-				} catch (Exception e) {}
-				
+					remoteValue = Float.parseFloat(tempValue);
+				} catch (Exception e) {
+				}
+
 				tempValue = "";
-				
+
 				for (Integer Int : localInts) {
 					if (tempValue == "") {
 						tempValue = Int + ".";
@@ -523,10 +522,11 @@ public class UpdateHandler {
 						tempValue = tempValue + Int;
 					}
 				}
-				
+
 				try {
-				localValue = Float.parseFloat(tempValue);
-				} catch (Exception e) {}
+					localValue = Float.parseFloat(tempValue);
+				} catch (Exception e) {
+				}
 
 				// Check versions
 				if (remoteValue < localValue) {
