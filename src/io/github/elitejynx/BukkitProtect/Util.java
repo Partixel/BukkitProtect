@@ -5,6 +5,53 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 
 public class Util {
+	public static List<Material> Doors = Arrays.asList(Material.WOODEN_DOOR, Material.IRON_DOOR_BLOCK, Material.TRAP_DOOR, Material.FENCE_GATE);
+
+	public static boolean isA(Material object, String type) {
+		List<Material> list = null;
+		if (type.equalsIgnoreCase("door"))
+			list = Doors;
+		if (list == null)
+			return false;
+		for (int i = 0; i < list.size(); i++)
+			if (object == list.get(i))
+				return true;
+		return false;
+	}
+
+	public static Location changeLoc(Location location, Vector vector) {
+		Location loc = location.getBlock().getLocation();
+		loc.add(vector);
+		return loc;
+	}
+
+	public static Location getBelow(Location location) {
+		Location loc = location.getBlock().getLocation();
+		loc.setY(loc.getY() - 1);
+		return loc;
+	}
+
+	public static Location getAbove(Location location) {
+		Location loc = location.getBlock().getLocation();
+		loc.setY(loc.getY() + 1);
+		return loc;
+	}
+
+	public static boolean hasAdjacent(Block block, String type, boolean vert) {
+		for (int i = 0; i < 4; i++) {
+			Location loc = block.getLocation();
+			addLoc(loc, i);
+			Block adjBlock = loc.getBlock();
+			if (isA(adjBlock.getType(), type))
+				return true;
+		}
+		if (isA(getBelow(block.getLocation()).getBlock().getType(), type))
+			return true;
+		if (isA(getAbove(block.getLocation()).getBlock().getType(), type))
+			return true;
+		return false;
+	}
+
 	public static UserType parseUserType(String str) {
 		for (UserType Type : BukkitProtect.Plugin.Types) {
 			if (Type.getName().equalsIgnoreCase(str)) {
