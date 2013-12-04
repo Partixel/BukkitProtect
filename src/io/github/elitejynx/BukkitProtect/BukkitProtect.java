@@ -1874,8 +1874,7 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 		if (event.isCancelled()) {
 			if (event.getAction() == Action.PHYSICAL) {
 				if (Util.hasAdjacent(block, "Door", false))
-					event.setCancelled(!Compat.playerCanAccess(player,
-							block.getLocation()));
+					event.setCancelled(!Protection.userHasType(Event.getPlayer().getName(), UTAccess));
 			}
 		}
 	}
