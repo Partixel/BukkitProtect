@@ -1722,10 +1722,7 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 		UserType requiredPerm = UTUseBlocks;
 		if (Event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 			if (Event.getClickedBlock() != null) {
-				if (Event.getClickedBlock().getType() == Material.IRON_DOOR_BLOCK
-						|| Event.getClickedBlock().getType() == Material.WOODEN_DOOR
-						|| Event.getClickedBlock().getType() == Material.TRAP_DOOR
-						|| Event.getClickedBlock().getType() == Material.FENCE_GATE) {
+				if (Util.isA(Event.getClickedBlock().getType(), "Door") {
 					requiredPerm = UTAccess;
 				}
 			}
@@ -1873,6 +1870,13 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 				}
 			}
 			Event.setUseInteractedBlock(Result.DENY);
+		}
+		if (event.isCancelled()) {
+			if (event.getAction() == Action.PHYSICAL) {
+				if (Util.hasAdjacent(block, "Door", false))
+					event.setCancelled(!Compat.playerCanAccess(player,
+							block.getLocation()));
+			}
 		}
 	}
 
