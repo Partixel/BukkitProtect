@@ -1069,20 +1069,16 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 			return null;
 		ProtectionZone Zone = null;
 		for (ArrayList<ProtectionZone> Zones : Protections.values()) {
-			for (int i = 0; i < Zones.size(); i++) {
+			for (ProtectionZone ProtZone : Zones) {
 				if (Zone == null) {
-					if (Util.isInside(Loc, Zones.get(i).getCorner1(), Zones
-							.get(i).getCorner2()))
-						Zone = Zones.get(i);
+					if (Util.isInside(Loc, ProtZone.getCorner1(),
+							ProtZone.getCorner2()))
+						Zone = ProtZone;
 				} else {
-					if (Zone.getSize() < Zones.get(i).getSize()) {
-						if (Util.isInside(Loc, Zones.get(i).getCorner1(), Zones
-								.get(i).getCorner2()))
-							Zone = Zones.get(i);
-					} else {
-						if (!Util.isInside(Loc, Zone.getCorner1(),
-								Zone.getCorner2()))
-							Zone = Zones.get(i);
+					if (Zone.getSize() < ProtZone.getSize()) {
+						if (Util.isInside(Loc, ProtZone.getCorner1(),
+								ProtZone.getCorner2()))
+							Zone = ProtZone;
 					}
 				}
 			}
