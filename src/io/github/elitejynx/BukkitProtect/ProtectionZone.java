@@ -146,18 +146,22 @@ public class ProtectionZone {
 					Types.add(UT.getName());
 				}
 			} else {
-				if (!Types.contains(Type.getName()))
+				if (!Types.contains(Type.getName())) {
 					Types.add(Type.getName());
+				} else {
+					return false;
+				}
 			}
 			Users.put(Plr, Types);
+			return true;
 		}
-		return false;
 	}
 
 	public boolean removeUsers(String Plr, UserType Type) {
 		if (Users.containsKey(Plr)) {
 			if (Type == null) {
 				Users.remove(Plr);
+				return true;
 			} else {
 				if (Users.get(Plr).contains(Type.getName())) {
 					ArrayList<String> Types = Users.get(Plr);
@@ -192,7 +196,7 @@ public class ProtectionZone {
 	}
 
 	public boolean removeTags(String Tag) {
-		if (!hasTag(Tag)) {
+		if (hasTag(Tag)) {
 			Tags.remove(Tag);
 			return true;
 		}

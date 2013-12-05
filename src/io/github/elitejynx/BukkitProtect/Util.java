@@ -3,8 +3,20 @@ package io.github.elitejynx.BukkitProtect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.material.Openable;
 
 public class Util {
+
+	public static boolean poweringDoor(Block block) {
+		return block.getRelative(BlockFace.NORTH).getState().getData() instanceof Openable
+				|| block.getRelative(BlockFace.SOUTH).getState().getData() instanceof Openable
+				|| block.getRelative(BlockFace.EAST).getState().getData() instanceof Openable
+				|| block.getRelative(BlockFace.WEST).getState().getData() instanceof Openable
+				|| block.getRelative(BlockFace.DOWN).getState().getData() instanceof Openable
+				|| block.getRelative(BlockFace.UP).getState().getData() instanceof Openable;
+	}
+
 	public static UserType parseUserType(String str) {
 		for (UserType Type : BukkitProtect.Plugin.Types) {
 			if (Type.getName().equalsIgnoreCase(str)) {

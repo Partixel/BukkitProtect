@@ -65,6 +65,10 @@ import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.material.Button;
+import org.bukkit.material.Lever;
+import org.bukkit.material.Openable;
+import org.bukkit.material.PressurePlate;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -530,10 +534,15 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 							.userHasAdminType(((Player) Sender).getName())
 							|| Sender
 									.hasPermission("BukkitProtect.Protection.EditOthers")) {
-						((ProtectionZone) PVP.PlayerSelectedZone.get(Sender)
-								.keySet().toArray()[0]).addUsers(Target, UT);
-						Sender.sendMessage("Added " + Target
-								+ " to the protection as " + UT.getName());
+						if (((ProtectionZone) PVP.PlayerSelectedZone
+								.get(Sender).keySet().toArray()[0]).addUsers(
+								Target, UT)) {
+							Sender.sendMessage("Added " + Target
+									+ " to the protection as " + Args[1]);
+						} else {
+							Sender.sendMessage("Could not add " + Target
+									+ " to the protection as " + Args[1]);
+						}
 					}
 				} else {
 					Sender.sendMessage("You have not selected a protection, to do this right click with a stick inside a protection");
@@ -687,11 +696,7 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 				Sender.sendMessage("You do not have permission to use this");
 				return true;
 			}
-			if (Args.length == 1 || Args.length == 2) {
-				String Type = "";
-				if (Args.length == 2) {
-					Type = Args[1];
-				}
+			if (Args.length == 2) {
 				String Target;
 				if (Args[0].equalsIgnoreCase("*")) {
 					Target = "*";
@@ -701,8 +706,8 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 					Sender.sendMessage("Could not find that player");
 					return true;
 				}
-				UserType UT = Util.parseUserType(Type);
-				if (UT == null && !Type.equalsIgnoreCase("*")) {
+				UserType UT = Util.parseUserType(Args[1]);
+				if (UT == null && !Args[1].equalsIgnoreCase("*")) {
 					for (UserType UType : Types) {
 						Sender.sendMessage(UType.getName() + " : "
 								+ UType.getDesc());
@@ -720,10 +725,10 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 								.get(Sender).keySet().toArray()[0])
 								.removeUsers(Target, UT)) {
 							Sender.sendMessage("Removed " + Target
-									+ " from the protection as " + UT.getName());
+									+ " from the protection as " + Args[1]);
 						} else {
 							Sender.sendMessage("Could not remove " + Target
-									+ " from the protection as " + UT.getName());
+									+ " from the protection as " + Args[1]);
 						}
 					}
 				} else {
@@ -1090,20 +1095,23 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 			return null;
 		ProtectionZone Zone = null;
 		for (ArrayList<ProtectionZone> Zones : Protections.values()) {
-			for (int i = 0; i < Zones.size(); i++) {
+			for (ProtectionZone ProtZone : Zones) {
 				if (Zone == null) {
-					if (Util.isInside(Loc, Zones.get(i).getCorner1(), Zones
-							.get(i).getCorner2()))
-						Zone = Zones.get(i);
+					if (Util.isInside(Loc, ProtZone.getCorner1(),
+							ProtZone.getCorner2()))
+						Zone = ProtZone;
 				} else {
-					if (Zone.getSize() > Zones.get(i).getSize()) {
-						if (Util.isInsideY(Loc, Zones.get(i).getCorner1(),
-								Zones.get(i).getCorner2()))
-							Zone = Zones.get(i);
+					if (Zone.getSize() > ProtZone.getSize()) {
+						if (Util.isInsideY(Loc, ProtZone.getCorner1(),
+								ProtZone.getCorner2()))
+							Zone = ProtZone;
 					} else {
-						if (!Util.isInsideY(Loc, Zone.getCorner1(),
-								Zone.getCorner2()))
-							Zone = Zones.get(i);
+						if (Util.isInside(Loc, ProtZone.getCorner1(),
+								ProtZone.getCorner2())
+								&& !Util.isInsideY(Loc, Zone.getCorner1(),
+										Zone.getCorner2())) {
+							Zone = ProtZone;
+						}
 					}
 				}
 			}
@@ -1720,13 +1728,31 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 		ProtectionZone Protection = isInsideProtection(Event.getClickedBlock()
 				.getLocation());
 		UserType requiredPerm = UTUseBlocks;
-		if (Event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-			if (Event.getClickedBlock() != null) {
-				if (Event.getClickedBlock().getType() == Material.IRON_DOOR_BLOCK
-						|| Event.getClickedBlock().getType() == Material.WOODEN_DOOR
-						|| Event.getClickedBlock().getType() == Material.TRAP_DOOR
-						|| Event.getClickedBlock().getType() == Material.FENCE_GATE) {
+		if (Event.getClickedBlock() != null) {
+			if (Event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+				if (Event.getClickedBlock().getState().getData() instanceof Openable) {
 					requiredPerm = UTAccess;
+				} else if (Event.getClickedBlock().getState().getData() instanceof Lever) {
+					Block Attached = Event.getClickedBlock().getRelative(
+							((Lever) Event.getClickedBlock().getState()
+									.getData()).getAttachedFace());
+					if (Util.poweringDoor(Event.getClickedBlock())
+							|| Util.poweringDoor(Attached))
+						requiredPerm = UTAccess;
+				} else if (Event.getClickedBlock().getState().getData() instanceof Button) {
+					Block Attached = Event.getClickedBlock().getRelative(
+							((Button) Event.getClickedBlock().getState()
+									.getData()).getAttachedFace());
+					if (Util.poweringDoor(Event.getClickedBlock())
+							|| Util.poweringDoor(Attached))
+						requiredPerm = UTAccess;
+				}
+			} else if (Event.getAction() == Action.PHYSICAL) {
+				if (Event.getClickedBlock().getState().getData() instanceof PressurePlate) {
+					if (Util.poweringDoor(Event.getClickedBlock())
+							|| Util.poweringDoor(Event.getClickedBlock()
+									.getRelative(BlockFace.DOWN)))
+						requiredPerm = UTAccess;
 				}
 			}
 		}
