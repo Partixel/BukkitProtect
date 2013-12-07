@@ -43,6 +43,7 @@ import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityCreatePortalEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -85,7 +86,7 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 	// Protections
 	public Map<String, ArrayList<ProtectionZone>> Protections = new HashMap<String, ArrayList<ProtectionZone>>();
 	public Map<String, Integer> LandOwned = new HashMap<String, Integer>();
-	public Map<String, String> Tags = new HashMap<String, String>();
+	public ArrayList<Tag> Tags = new ArrayList<Tag>();
 	public ArrayList<UserType> Types = new ArrayList<UserType>();
 
 	public UserType UTAccess = new UserType("Access",
@@ -139,11 +140,14 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 		RodA = addRod(baseRod, "Rod of the Admin", -1, 6, null);
 	}
 
-	/**
-	 * 
-	 * @param Type
-	 *            - The UserType you defined
-	 */
+	public void addTag(String name, String desc, String... Values) {
+		Tag tag = new Tag(name.toLowerCase(), desc.toLowerCase());
+		for (String value : Values) {
+			tag.addValues(value.toLowerCase());
+		}
+		Tags.add(tag);
+	}
+
 	public void addUserType(UserType Type) {
 		Types.add(Type);
 	}
@@ -152,13 +156,14 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 	public void onEnable() {
 		Plugin = this;
 		this.saveDefaultConfig();
-		Tags.put("PreventPVP", "Prevent PVP");
-		Tags.put("PreventFireSpread", "Prevent fire spread");
-		Tags.put("PreventIceMeltForm", "Prevent ice melting or forming");
-		Tags.put("PreventSnowMeltForm", "Prevent snow melting or forming");
-		Tags.put("PreventEntitySpawn", "Prevent entities spawning");
-		Tags.put("ServerOwned",
-				"Prevents this protection from being counted in the owners land blocks");
+		addTag("PVP", "Prevent PVP", "true", "false");
+		addTag("Fire", "Prevent fire spread", "true", "false");
+		addTag("Ice", "Prevent ice melting or forming", "true", "false");
+		addTag("Snow", "Prevent snow melting or forming", "true", "false");
+		addTag("EntitySpawn", "Prevent entities spawning", "true", "false");
+		addTag("ServerOwned",
+				"Prevents this protection from being counted in the owners land blocks",
+				"true");
 		addUserType(UTAccess);
 		addUserType(UTEntities);
 		addUserType(UTBuildBlocks);
@@ -306,7 +311,8 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 										.getCube().getSize()
 										&& !((ProtectionZone) PVP.PlayerSelectedZone
 												.get(Sender).keySet().toArray()[0])
-												.hasTag("ServerOwned")) {
+												.getTag("ServerOwned")
+												.equalsIgnoreCase("true")) {
 									Sender.sendMessage(Target.getName()
 											+ " needs "
 											+ (((ProtectionZone) PVP.PlayerSelectedZone
@@ -441,8 +447,9 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 									if ((LandOwned.get(Target.getName()) - getTotalLandUsed(Target)) < (Length * Width)
 											&& !((ProtectionZone) PVP.PlayerSelectedZone
 													.get(Sender).keySet()
-													.toArray()[0])
-													.hasTag("ServerOwned")) {
+													.toArray()[0]).getTag(
+													"ServerOwned")
+													.equalsIgnoreCase("true")) {
 										Sender.sendMessage(Target.getName()
 												+ " needs "
 												+ ((Length * Width) - (LandOwned
@@ -564,12 +571,11 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 				Sender.sendMessage("You do not have permission to use this");
 				return true;
 			}
-			if (Args.length == 1) {
-				if (Util.isTag(Args[0]) == null) {
-					for (int i = 0; i < Tags.keySet().size(); i++) {
-						String TagName = ((String) Tags.keySet().toArray()[i]);
-						String TagDesc = Tags.get(TagName);
-						Sender.sendMessage(TagName + " : " + TagDesc);
+			if (Args.length == 2) {
+				if (!Util.isTagAndValue(Args[0], Args[1])) {
+					for (Tag tag : Tags) {
+						Sender.sendMessage(tag.getName() + " : "
+								+ tag.getDesc());
 					}
 					Sender.sendMessage("That is not a valid tag");
 					return true;
@@ -581,30 +587,26 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 							|| Sender
 									.hasPermission("BukkitProtect.Protection.EditOthers")) {
 						if (((ProtectionZone) PVP.PlayerSelectedZone
-								.get(Sender).keySet().toArray()[0])
-								.addTags(Util.isTag(Args[0]))) {
-							Sender.sendMessage("Added the tag "
-									+ Util.isTag(Args[0])
+								.get(Sender).keySet().toArray()[0]).setTags(
+								Args[0].toLowerCase(), Args[1].toLowerCase())) {
+							Sender.sendMessage("Added the tag " + Args[0]
 									+ " to the protection");
 
 						} else {
 							Sender.sendMessage("Could not add the tag "
-									+ Util.isTag(Args[0])
-									+ " to the protection");
+									+ Args[0] + " to the protection");
 						}
 					}
 				} else {
 					Sender.sendMessage("You have not selected a protection, to do this right click with a stick inside a protection");
 					return true;
 				}
-			} else if (Args.length > 1) {
+			} else if (Args.length > 2) {
 				Sender.sendMessage("Too many arguements, please retry");
 				return false;
 			} else {
-				for (int i = 0; i < Tags.keySet().size(); i++) {
-					String TagName = ((String) Tags.keySet().toArray()[i]);
-					String TagDesc = Tags.get(TagName);
-					Sender.sendMessage(TagName + " : " + TagDesc);
+				for (Tag tag : Tags) {
+					Sender.sendMessage(tag.getName() + " : " + tag.getDesc());
 				}
 				return false;
 			}
@@ -629,10 +631,13 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 								.isEmpty()) {
 							Sender.sendMessage("This protection has no tags");
 						} else {
-							for (String Tag : ((ProtectionZone) PVP.PlayerSelectedZone
+							for (String Name : ((ProtectionZone) PVP.PlayerSelectedZone
 									.get(Sender).keySet().toArray()[0])
-									.getTags()) {
-								Sender.sendMessage(Tag);
+									.getTags().keySet()) {
+								String Value = ((ProtectionZone) PVP.PlayerSelectedZone
+										.get(Sender).keySet().toArray()[0])
+										.getTags().get(Name);
+								Sender.sendMessage(Name + " : " + Value);
 							}
 						}
 					}
@@ -752,11 +757,10 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 				return true;
 			}
 			if (Args.length == 1) {
-				if (Util.isTag(Args[0]) == null) {
-					for (int i = 0; i < Tags.keySet().size(); i++) {
-						String TagName = ((String) Tags.keySet().toArray()[i]);
-						String TagDesc = Tags.get(TagName);
-						Sender.sendMessage(TagName + " : " + TagDesc);
+				if (!Util.isTag(Args[0])) {
+					for (UserType UType : Types) {
+						Sender.sendMessage(UType.getName() + " : "
+								+ UType.getDesc());
 					}
 					Sender.sendMessage("That is not a valid tag");
 					return true;
@@ -769,12 +773,11 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 									.hasPermission("BukkitProtect.Protection.EditOthers")) {
 						if (((ProtectionZone) PVP.PlayerSelectedZone
 								.get(Sender).keySet().toArray()[0])
-								.removeTags(Util.isTag(Args[0]))) {
-							Sender.sendMessage("Removed " + Util.isTag(Args[0])
+								.removeTags(Args[0].toLowerCase())) {
+							Sender.sendMessage("Removed " + Args[0]
 									+ " from the protection");
 						} else {
-							Sender.sendMessage("Could not remove "
-									+ Util.isTag(Args[0])
+							Sender.sendMessage("Could not remove " + Args[0]
 									+ " from the protection");
 						}
 					}
@@ -1055,7 +1058,7 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 			ArrayList<ProtectionZone> Zones = Protections.get(Plr.getName());
 			int Total = 0;
 			for (ProtectionZone Zone : Zones) {
-				if (!Zone.hasTag("ServerOwned")) {
+				if (!Zone.getTag("ServerOwned").equalsIgnoreCase("true")) {
 					Total = Total + Zone.getCube().getSize();
 				}
 			}
@@ -1065,9 +1068,10 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 		}
 	}
 
-	public ProtectionZone isInsideBiggestProtection(Location Loc) {
+	public ProtectionZone isInsideBiggestProtection(Location loc) {
 		if (Protections.isEmpty())
 			return null;
+		Location Loc = loc.clone();
 		ProtectionZone Zone = null;
 		for (ArrayList<ProtectionZone> Zones : Protections.values()) {
 			for (ProtectionZone ProtZone : Zones) {
@@ -1085,9 +1089,10 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 		return Zone;
 	}
 
-	public ProtectionZone isInsideProtection(Location Loc) {
+	public ProtectionZone isInsideProtection(Location loc) {
 		if (Protections.isEmpty())
 			return null;
+		Location Loc = loc.clone();
 		ProtectionZone Zone = null;
 		for (ArrayList<ProtectionZone> Zones : Protections.values()) {
 			for (ProtectionZone ProtZone : Zones) {
@@ -1308,7 +1313,7 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 					if (Prots == null)
 						Prots = new ArrayList<ProtectionZone>();
 					if (infinite)
-						newProt.addTags("ServerOwned");
+						newProt.setTags("ServerOwned", "true");
 					Prots.add(newProt);
 					Protections.put(Plr.getName(), Prots);
 					PVP.PlayerSelection.remove(Plr);
@@ -1474,9 +1479,28 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 		PVP.UpdateBlock.put(Plr, Blocks);
 	}
 
+	public String getOverridingTag(String Tag, Location Loc) {
+		ProtectionZone Zone = isInsideProtection(Loc);
+		if (Zone != null) {
+			ProtectionZone MainZone = isInsideBiggestProtection(Loc);
+			if (Zone != MainZone) {
+				if (!MainZone.getTag(Tag.toLowerCase()).equalsIgnoreCase("")) {
+					return MainZone.getTag(Tag.toLowerCase());
+				} else {
+					return Zone.getTag(Tag.toLowerCase());
+				}
+			} else {
+				return Zone.getTag(Tag.toLowerCase());
+			}
+		}
+		// if (World.hasTag(Tag) != "") {
+		// return World.hasTag(Tag);
+		// }
+		return "";
+	}
+
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void WorldSave(WorldSaveEvent Event) {
-
 		try {
 			save(LandOwned, LandPath);
 		} catch (Exception e) {
@@ -1485,7 +1509,6 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 			} catch (Exception e1) {
 			}
 		}
-
 		Map<String, String> StringProtections = new HashMap<String, String>();
 		if (!Protections.isEmpty())
 			for (String Player : Protections.keySet()) {
@@ -1650,11 +1673,13 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 				.getLocation());
 		if (Protection == null)
 			return;
-		if (Protection.hasTag("PreventIceMeltForm")
+		if (getOverridingTag("Ice", Event.getBlock().getLocation())
+				.equalsIgnoreCase("true")
 				&& Event.getNewState().getType() == Material.ICE) {
 			Event.setCancelled(true);
 		}
-		if (Protection.hasTag("PreventSnowMeltForm")
+		if (getOverridingTag("Snow", Event.getBlock().getLocation())
+				.equalsIgnoreCase("true")
 				&& Event.getNewState().getType() == Material.SNOW) {
 			Event.setCancelled(true);
 		}
@@ -1664,15 +1689,13 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 	public void BlockFade(BlockFadeEvent Event) {
 		if (Event.getBlock() == null)
 			return;
-		ProtectionZone Protection = isInsideProtection(Event.getBlock()
-				.getLocation());
-		if (Protection == null)
-			return;
-		if (Protection.hasTag("PreventIceMeltForm")
+		if (getOverridingTag("Ice", Event.getBlock().getLocation())
+				.equalsIgnoreCase("true")
 				&& Event.getBlock().getType() == Material.ICE) {
 			Event.setCancelled(true);
 		}
-		if (Protection.hasTag("PreventSnowMeltForm")
+		if (getOverridingTag("Snow", Event.getBlock().getLocation())
+				.equalsIgnoreCase("true")
 				&& Event.getBlock().getType() == Material.SNOW) {
 			Event.setCancelled(true);
 		}
@@ -1813,7 +1836,7 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 				if (Event.getItem() != null) {
 					if (Event.getAction() == Action.RIGHT_CLICK_BLOCK
 							&& Event.getPlayer().hasPermission(
-									"MakeProtections")) {
+									"BukkitProtect.Protection.MakeProtections")) {
 						Bukkit.getServer().getScheduler()
 								.scheduleSyncDelayedTask(this, new Runnable() {
 									@Override
@@ -1842,12 +1865,12 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 															Event.getClickedBlock()
 																	.getLocation(),
 															Rod);
+												} else {
+													DisplayProtection(Event
+															.getPlayer(), Event
+															.getClickedBlock()
+															.getLocation());
 												}
-											} else {
-												DisplayProtection(Event
-														.getPlayer(), Event
-														.getClickedBlock()
-														.getLocation());
 											}
 										}
 									}
@@ -1867,7 +1890,11 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 									ItemStack Rod = Event.getPlayer()
 											.getInventory().getItemInHand();
 									if (RodTypes.contains(Rod.getType())) {
-										if (Rod.getItemMeta().getLore() == null) {
+										if (Rod.getItemMeta().getLore() != null
+												&& Rod.getItemMeta()
+														.getLore()
+														.get(0)
+														.equals("Protect your land")) {
 											DisplayProtection(
 													Event.getPlayer(), Event
 															.getClickedBlock()
@@ -1901,11 +1928,11 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 			return;
 		if (Event.getEntity() instanceof Player)
 			return;
-		ProtectionZone Protection = isInsideProtection(Event.getLocation());
-		if (Protection != null) {
-			if (Protection.hasTag("PreventEntitySpawn")) {
-				Event.setCancelled(true);
-			}
+		if (Event.getSpawnReason() != SpawnReason.NATURAL)
+			return;
+		if (getOverridingTag("EntitySpawn", Event.getLocation())
+				.equalsIgnoreCase("true")) {
+			Event.setCancelled(true);
 		}
 	}
 
@@ -1925,14 +1952,12 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 			if (Event.getCause() == IgniteCause.SPREAD) {
 				Event.setCancelled(true);
 			}
-		ProtectionZone Protection = isInsideProtection(Event.getBlock()
-				.getLocation());
-		if (Protection != null)
-			if (Protection.hasTag("PreventFireSpread")) {
-				if (Event.getCause() == IgniteCause.SPREAD) {
-					Event.setCancelled(true);
-				}
+		if (getOverridingTag("Fire", Event.getBlock().getLocation())
+				.equalsIgnoreCase("true")) {
+			if (Event.getCause() == IgniteCause.SPREAD) {
+				Event.setCancelled(true);
 			}
+		}
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -2188,24 +2213,11 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 		if (Event.getEntity() instanceof Player) {
 			if (PVP.isPlayerInPVPWith((Player) Event.getEntity(), Attacker))
 				return;
-			ProtectionZone Protection = isInsideProtection(Event.getEntity()
-					.getLocation());
-			ProtectionZone Protection2 = isInsideProtection(Attacker
-					.getLocation());
-
-			if (Protection != null && Protection2 != null) {
-				if (!Protection.hasTag("PreventPVP")
-						&& !Protection2.hasTag("PreventPVP"))
-					return;
-			} else if (Protection != null) {
-				if (!Protection.hasTag("PreventPVP"))
-					return;
-			} else if (Protection2 != null) {
-				if (!Protection2.hasTag("PreventPVP"))
-					return;
-			} else {
+			if (!getOverridingTag("PVP", Event.getEntity().getLocation())
+					.equalsIgnoreCase("true")
+					&& !getOverridingTag("PVP", Attacker.getLocation())
+							.equalsIgnoreCase("true"))
 				return;
-			}
 		}
 
 		Event.setCancelled(true);

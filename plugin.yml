@@ -91,7 +91,7 @@ commands:
     usage: /<command> [player]
   AddTag:
     description: Add a tag to the selected protection
-    usage: /<command> [Tag]
+    usage: /<command> [Tag] [Value]
   RemoveTag:
     description: Remove a tag from the selected protection
     usage: /<command> [Tag]

@@ -8,6 +8,25 @@ import org.bukkit.material.Openable;
 
 public class Util {
 
+	public static boolean isTagAndValue(String Name, String Value) {
+		for (Tag tag : BukkitProtect.Plugin.Tags) {
+			if (tag.getName().equalsIgnoreCase(Name)
+					&& tag.getValues().contains(Value.toLowerCase())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static boolean isTag(String Name) {
+		for (Tag tag : BukkitProtect.Plugin.Tags) {
+			if (tag.getName().equalsIgnoreCase(Name)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public static boolean poweringDoor(Block block) {
 		return block.getRelative(BlockFace.NORTH).getState().getData() instanceof Openable
 				|| block.getRelative(BlockFace.SOUTH).getState().getData() instanceof Openable
@@ -21,15 +40,6 @@ public class Util {
 		for (UserType Type : BukkitProtect.Plugin.Types) {
 			if (Type.getName().equalsIgnoreCase(str)) {
 				return Type;
-			}
-		}
-		return null;
-	}
-
-	public static String isTag(String str) {
-		for (String Str : BukkitProtect.Plugin.Tags.keySet()) {
-			if (Str.equalsIgnoreCase(str)) {
-				return Str;
 			}
 		}
 		return null;

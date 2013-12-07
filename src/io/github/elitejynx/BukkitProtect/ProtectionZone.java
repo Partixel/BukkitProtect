@@ -70,10 +70,14 @@ public class ProtectionZone {
 		} catch (Exception e) {
 		}
 		try {
-			if (Splits[4].split("\\[")[1].split("\\]").length == 1)
-				for (String str : Splits[4].split("\\[")[1].split("\\]")[0]
-						.split(", "))
-					Tags.add(str.trim());
+			if (Splits[4].split("\\{")[1].split("\\}").length == 1) {
+				Map<String, String> StringTags = Splitter.on(", ")
+						.withKeyValueSeparator("=")
+						.split(Splits[4].split("\\{")[1].split("\\}")[0]);
+				for (String str : StringTags.keySet()) {
+					Tags.put(str, StringTags.get(str));
+				}
+			}
 		} catch (Exception e) {
 		}
 		Zones.add(this);
@@ -157,16 +161,16 @@ public class ProtectionZone {
 		Owner = owner;
 	}
 
-	public boolean addTags(String Tag, String Value) {
-		if (Util.isTag(Tag) != null && !hasTag(Tag)) {
-			Tags.add(Util.isTag(Tag));
+	public boolean setTags(String Tag, String Value) {
+		if (!getTag(Tag).equalsIgnoreCase(Value)) {
+			Tags.put(Tag, Value);
 			return true;
 		}
 		return false;
 	}
 
 	public boolean removeTags(String Tag) {
-		if (hasTag(Tag)) {
+		if (getTag(Tag) != "") {
 			Tags.remove(Tag);
 			return true;
 		}
@@ -208,8 +212,11 @@ public class ProtectionZone {
 		return false;
 	}
 
-	public boolean hasTag(String Tag) {
-		return Tags.contains(Util.isTag(Tag));
+	public String getTag(String Type) {
+		if (Tags.containsKey(Type.toLowerCase())) {
+			return Tags.get(Type.toLowerCase());
+		} else {
+			return "";
+		}
 	}
-
 }

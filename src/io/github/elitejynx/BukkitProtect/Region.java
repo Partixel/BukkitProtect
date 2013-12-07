@@ -100,7 +100,7 @@ public class Region {
 
 	public Boolean zonesIntersect(Region Region1, boolean Y) {
 		Location corner1 = Corner1.clone();
-		Location corner2 = Corner1.clone();
+		Location corner2 = Corner2.clone();
 		Location corner3 = Region1.getCorner1().clone();
 		Location corner4 = Region1.getCorner2().clone();
 		int MaxX1 = Math.max(corner1.getBlockX(), corner2.getBlockX());
@@ -111,10 +111,10 @@ public class Region {
 		int MinX2 = Math.min(corner3.getBlockX(), corner4.getBlockX());
 		int MaxZ2 = Math.max(corner3.getBlockZ(), corner4.getBlockZ());
 		int MinZ2 = Math.min(corner3.getBlockZ(), corner4.getBlockZ());
-		int MaxY1 = 0;
+		int MaxY1 = 10;
 		int MinY1 = 0;
 		int MaxY2 = 10;
-		int MinY2 = 10;
+		int MinY2 = 0;
 		if (Y) {
 			MaxY2 = Math.max(corner3.getBlockY(), corner4.getBlockY());
 			MinY2 = Math.min(corner3.getBlockY(), corner4.getBlockY());
