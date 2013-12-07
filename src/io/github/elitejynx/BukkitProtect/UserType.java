@@ -6,49 +6,30 @@ public class UserType {
 
 	private String Name;
 	private String Desc;
-	private Material Display;
+	private Material CornerDisplay;
+	private int CornerMeta;
+	private Material SideDisplay;
+	private int SideMeta;
 	private int Priority;
 	private boolean Admin;
 
-	/**
-	 * 
-	 * @param name
-	 *            - The name of the UserType
-	 * @param desc
-	 *            - The description of the UserType
-	 * @param display
-	 *            - The material the UserType will be
-	 * @param priority
-	 *            - The priority of the UserType during display - 5 for highest,
-	 *            1 for lowest - 0 won't show
-	 * @param admin
-	 *            - Whether or not the UserType will allow access to commands
-	 */
-	public UserType(String name, String desc, Material display, int priority,
-			boolean admin) {
-		this.setName(name);
-		this.setDesc(desc);
-		this.setDisplay(display);
-		this.setPriority(priority);
-		this.setAdmin(admin);
+	public UserType(String name, String desc, Material cdisplay, int cmeta,
+			Material sdisplay, int smeta, int priority, boolean admin) {
+		setName(name);
+		setDesc(desc);
+		setCornerDisplay(cdisplay);
+		setCornerMeta(cmeta);
+		setSideDisplay(sdisplay);
+		setSideMeta(smeta);
+		setPriority(priority);
+		setAdmin(admin);
 	}
 
-	/**
-	 * 
-	 * @param name
-	 *            - The name of the UserType
-	 * @param desc
-	 *            - The description of the UserType
-	 * @param priority
-	 *            - The priority of the UserType - 5 for highest, 1 for lowest
-	 * @param admin
-	 *            - Whether or not the UserType will allow access to commands
-	 */
 	public UserType(String name, String desc, int priority, boolean admin) {
-		this.setName(name);
-		this.setDesc(desc);
-		this.setPriority(priority);
-		this.setAdmin(admin);
+		setName(name);
+		setDesc(desc);
+		setPriority(priority);
+		setAdmin(admin);
 	}
 
 	public String getName() {
@@ -67,14 +48,6 @@ public class UserType {
 		Desc = desc;
 	}
 
-	public Material getDisplay() {
-		return Display;
-	}
-
-	public void setDisplay(Material display) {
-		Display = display;
-	}
-
 	public boolean isAdmin() {
 		return Admin;
 	}
@@ -89,6 +62,38 @@ public class UserType {
 
 	public void setPriority(int priority) {
 		Priority = priority;
+	}
+
+	public Material getCornerDisplay() {
+		return CornerDisplay;
+	}
+
+	public void setCornerDisplay(Material cornerDisplay) {
+		CornerDisplay = cornerDisplay;
+	}
+
+	public int getSideMeta() {
+		return SideMeta;
+	}
+
+	public void setSideMeta(int sideMeta) {
+		SideMeta = sideMeta;
+	}
+
+	public Material getSideDisplay() {
+		return SideDisplay;
+	}
+
+	public void setSideDisplay(Material sideDisplay) {
+		SideDisplay = sideDisplay;
+	}
+
+	public int getCornerMeta() {
+		return CornerMeta;
+	}
+
+	public void setCornerMeta(int cornerMeta) {
+		CornerMeta = cornerMeta;
 	}
 
 }

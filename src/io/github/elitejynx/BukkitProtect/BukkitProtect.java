@@ -90,16 +90,20 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 	public ArrayList<UserType> Types = new ArrayList<UserType>();
 
 	public UserType UTAccess = new UserType("Access",
-			"Allows the use of blocks to access the area", Material.LOG, 1,
-			false);
+			"Allows the use of blocks to access the area",
+			Material.STAINED_CLAY, 8, Material.STAINED_CLAY, 0, 1, false);
 	public UserType UTEntities = new UserType("Entities",
-			"Allows the use of entities", Material.COAL_BLOCK, 2, false);
+			"Allows the use of entities", Material.STAINED_CLAY, 7,
+			Material.STAINED_CLAY, 12, 2, false);
 	public UserType UTBuildBlocks = new UserType("BuildBlocks",
-			"Allows the building of blocks", Material.IRON_BLOCK, 3, false);
+			"Allows the building of blocks", Material.STAINED_CLAY, 13,
+			Material.STAINED_CLAY, 5, 3, false);
 	public UserType UTUseBlocks = new UserType("UseBlocks",
-			"Allows the use of blocks", Material.GOLD_BLOCK, 3, false);
+			"Allows the use of blocks", Material.STAINED_CLAY, 11,
+			Material.STAINED_CLAY, 3, 3, false);
 	public UserType UTModerator = new UserType("Moderator",
-			"Allows the use of commands", Material.DIAMOND_BLOCK, 5, true);
+			"Allows the use of commands", Material.STAINED_CLAY, 1,
+			Material.STAINED_CLAY, 4, 5, true);
 
 	public ArrayList<Material> RodTypes = new ArrayList<Material>();
 
@@ -1121,11 +1125,15 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 		Block Center = Util.GetLowestBlock(blockLoc.clone());
 		Block Forward = Util.GetLowestBlock(blockLoc.clone().add(0, 0, 1));
 		Block Backward = Util.GetLowestBlock(blockLoc.clone().add(0, 0, -1));
-		Plr.sendBlockChange(Left.getLocation(), Material.GLASS, (byte) 0);
-		Plr.sendBlockChange(Right.getLocation(), Material.GLASS, (byte) 0);
-		Plr.sendBlockChange(Center.getLocation(), Material.BEACON, (byte) 0);
-		Plr.sendBlockChange(Forward.getLocation(), Material.GLASS, (byte) 0);
-		Plr.sendBlockChange(Backward.getLocation(), Material.GLASS, (byte) 0);
+		Plr.sendBlockChange(Left.getLocation(), Material.STAINED_CLAY, (byte) 5);
+		Plr.sendBlockChange(Right.getLocation(), Material.STAINED_CLAY,
+				(byte) 5);
+		Plr.sendBlockChange(Center.getLocation(), Material.STAINED_CLAY,
+				(byte) 13);
+		Plr.sendBlockChange(Forward.getLocation(), Material.STAINED_CLAY,
+				(byte) 5);
+		Plr.sendBlockChange(Backward.getLocation(), Material.STAINED_CLAY,
+				(byte) 5);
 		Location EffectsLoc = Center.getLocation().add(0, 1, 0);
 		ItemMeta RodMeta = Rod.getItemMeta();
 		boolean infinite = false;
@@ -1402,15 +1410,22 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 		if (Zone == null)
 			return;
 
-		Material Type = Material.REDSTONE_BLOCK;
+		Material CType = Material.STAINED_CLAY;
+		int CMeta = 14;
+		Material SType = Material.STAINED_CLAY;
+		int SMeta = 6;
 		int priority = 0;
 		boolean Admin = false;
 
 		for (UserType UType : Types) {
 			if (Zone.userHasType(Plr.getName(), UType)) {
 				if (UType.getPriority() > priority) {
-					if (UType.getDisplay() != null) {
-						Type = UType.getDisplay();
+					if (UType.getCornerDisplay() != null
+							&& UType.getSideDisplay() != null) {
+						CType = UType.getCornerDisplay();
+						CMeta = UType.getCornerMeta();
+						SType = UType.getSideDisplay();
+						SMeta = UType.getSideMeta();
 						priority = UType.getPriority();
 					}
 				}
@@ -1467,9 +1482,9 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 			Block Center = Util.GetLowestBlockRelative(LocUseC,
 					Plr.getLocation());
 
-			Plr.sendBlockChange(Left.getLocation(), Type, (byte) 0);
-			Plr.sendBlockChange(Right.getLocation(), Type, (byte) 0);
-			Plr.sendBlockChange(Center.getLocation(), Type, (byte) 0);
+			Plr.sendBlockChange(Left.getLocation(), SType, (byte) SMeta);
+			Plr.sendBlockChange(Right.getLocation(), SType, (byte) SMeta);
+			Plr.sendBlockChange(Center.getLocation(), CType, (byte) CMeta);
 
 			Blocks.put(Left, 60);
 			Blocks.put(Right, 60);
