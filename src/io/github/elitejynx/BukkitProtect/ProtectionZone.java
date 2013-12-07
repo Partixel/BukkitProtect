@@ -4,29 +4,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.bukkit.Location;
-
 import com.google.common.base.Splitter;
 
 public class ProtectionZone {
 
-	private Location Corner1;
-	private Location Corner2;
+	private Region Cube;
 	private String Owner;
 	private Map<String, ArrayList<String>> Users = new HashMap<String, ArrayList<String>>();
-	private ArrayList<String> Tags = new ArrayList<String>();
+	private Map<String, String> Tags = new HashMap<String, String>();
 
-	public ProtectionZone(Location CornerA, Location CornerB, String Plr) {
-		if (CornerA != null)
-			setCorner1(CornerA);
-		if (CornerB != null)
-			setCorner2(CornerB);
+	public ProtectionZone(Region cube, String Plr) {
+		if (cube != null)
+			setCube(cube);
 		if (Plr != null)
 			setOwner(Plr);
 	}
 
 	public ProtectionZone Clone() {
-		ProtectionZone newZone = new ProtectionZone(Corner1, Corner2, Owner);
+		ProtectionZone newZone = new ProtectionZone(Cube.Clone(), Owner);
 		newZone.setUsers(Users);
 		newZone.setTags(Tags);
 		return newZone;
@@ -35,8 +30,7 @@ public class ProtectionZone {
 	@Override
 	public String toString() {
 		String Total = "";
-		Total = Total + Util.loc2str(Corner1);
-		Total = Total + "|" + Util.loc2str(Corner2);
+		Total = Total + Cube.toString();
 		Total = Total + "|" + Owner;
 		Total = Total + "|" + Users.toString();
 		Total = Total + "|" + Tags.toString();
@@ -47,11 +41,7 @@ public class ProtectionZone {
 			ArrayList<ProtectionZone> Zones) {
 		String[] Splits = Total.split("\\|");
 		try {
-			Corner1 = Util.str2loc(Splits[0].trim());
-		} catch (Exception e) {
-		}
-		try {
-			Corner2 = Util.str2loc(Splits[1].trim());
+			Cube = Util.regionfromString(Splits[0].trim(), Splits[1].trim());
 		} catch (Exception e) {
 		}
 		try {
@@ -88,34 +78,6 @@ public class ProtectionZone {
 		}
 		Zones.add(this);
 		return Zones;
-	}
-
-	public Location getCorner1() {
-		return Corner1;
-	}
-
-	public void setCorner1(Location corner1) {
-		Corner1 = corner1;
-	}
-
-	public Location getCorner2() {
-		return Corner2;
-	}
-
-	public void setCorner2(Location corner2) {
-		Corner2 = corner2;
-	}
-
-	public int getWidth() {
-		return Math.abs(getCorner1().getBlockZ() - getCorner2().getBlockZ());
-	}
-
-	public int getLength() {
-		return Math.abs(getCorner1().getBlockX() - getCorner2().getBlockX());
-	}
-
-	public int getSize() {
-		return getWidth() * getLength();
 	}
 
 	public Map<String, ArrayList<String>> getUsers() {
@@ -179,6 +141,14 @@ public class ProtectionZone {
 		return false;
 	}
 
+	public Region getCube() {
+		return Cube;
+	}
+
+	public void setCube(Region cube) {
+		Cube = cube;
+	}
+
 	public String getOwner() {
 		return Owner;
 	}
@@ -187,7 +157,7 @@ public class ProtectionZone {
 		Owner = owner;
 	}
 
-	public boolean addTags(String Tag) {
+	public boolean addTags(String Tag, String Value) {
 		if (Util.isTag(Tag) != null && !hasTag(Tag)) {
 			Tags.add(Util.isTag(Tag));
 			return true;
@@ -203,11 +173,11 @@ public class ProtectionZone {
 		return false;
 	}
 
-	public ArrayList<String> getTags() {
+	public Map<String, String> getTags() {
 		return Tags;
 	}
 
-	public void setTags(ArrayList<String> tags) {
+	public void setTags(Map<String, String> tags) {
 		Tags = tags;
 	}
 

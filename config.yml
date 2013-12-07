@@ -4,7 +4,7 @@ AutoUpdate: true
 
 # Protection
 
-MinimumZoneSize: 5
+MinimumZoneSize: 6
 
 ProtectChests: true #If a player places a chest and has no protections, a new one is created around the chest
 
@@ -60,4 +60,5 @@ EnderCrystalBlockDamage: false
 
 EndermenBlockChange: false
 
+EnderDragonBlockDamage: false
 ZombiesBreakDoors: true

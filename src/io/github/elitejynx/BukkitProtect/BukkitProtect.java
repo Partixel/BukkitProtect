@@ -185,7 +185,7 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 				for (String Zone : StringProtections.get(Player).split(" / ")) {
 					if (Zone.length() > 0) {
 						ArrayList<ProtectionZone> newZones = new ArrayList<ProtectionZone>();
-						new ProtectionZone(null, null, null).fromString(Zone,
+						new ProtectionZone(null, null).fromString(Zone,
 								newZones);
 						for (ProtectionZone newZone : newZones) {
 							Zones.add(newZone);
@@ -303,7 +303,7 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 							if (LandOwned.containsKey(Target.getName())) {
 								if ((LandOwned.get(Target.getName()) - getTotalLandUsed(Target)) < ((ProtectionZone) PVP.PlayerSelectedZone
 										.get(Sender).keySet().toArray()[0])
-										.getSize()
+										.getCube().getSize()
 										&& !((ProtectionZone) PVP.PlayerSelectedZone
 												.get(Sender).keySet().toArray()[0])
 												.hasTag("ServerOwned")) {
@@ -311,7 +311,8 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 											+ " needs "
 											+ (((ProtectionZone) PVP.PlayerSelectedZone
 													.get(Sender).keySet()
-													.toArray()[0]).getSize() - (LandOwned
+													.toArray()[0]).getCube()
+													.getSize() - (LandOwned
 													.get(Target.getName()) - getTotalLandUsed(Target)))
 											+ " more blocks of land to have the protection");
 									return true;
@@ -422,19 +423,19 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 							int Length = Math
 									.abs(((ProtectionZone) PVP.PlayerSelectedZone
 											.get(Sender).keySet().toArray()[0])
-											.getCorner1().getBlockX()
+											.getCube().getCorner1().getBlockX()
 											- ((ProtectionZone) PVP.PlayerSelectedZone
 													.get(Sender).keySet()
-													.toArray()[0]).getCorner2()
-													.getBlockX());
+													.toArray()[0]).getCube()
+													.getCorner2().getBlockX());
 							int Width = Math
 									.abs(((ProtectionZone) PVP.PlayerSelectedZone
 											.get(Sender).keySet().toArray()[0])
-											.getCorner1().getBlockZ()
+											.getCube().getCorner1().getBlockZ()
 											- ((ProtectionZone) PVP.PlayerSelectedZone
 													.get(Sender).keySet()
-													.toArray()[0]).getCorner2()
-													.getBlockZ());
+													.toArray()[0]).getCube()
+													.getCorner2().getBlockZ());
 							if (getConfig().getBoolean("BuyableLand")) {
 								if (LandOwned.containsKey(Target.getName())) {
 									if ((LandOwned.get(Target.getName()) - getTotalLandUsed(Target)) < (Length * Width)
@@ -943,7 +944,7 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 						Sender.sendMessage("You can build or break blocks to leave this protection");
 					} else {
 						((Player) Sender).teleport(((Player) Sender).getWorld()
-								.getHighestBlockAt(Zone.getCorner1())
+								.getHighestBlockAt(Zone.getCube().getCorner1())
 								.getLocation());
 						Sender.sendMessage("Teleported you out of the protection");
 					}
@@ -1055,7 +1056,7 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 			int Total = 0;
 			for (ProtectionZone Zone : Zones) {
 				if (!Zone.hasTag("ServerOwned")) {
-					Total = Total + Zone.getSize();
+					Total = Total + Zone.getCube().getSize();
 				}
 			}
 			return Total;
@@ -1071,13 +1072,11 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 		for (ArrayList<ProtectionZone> Zones : Protections.values()) {
 			for (ProtectionZone ProtZone : Zones) {
 				if (Zone == null) {
-					if (Util.isInside(Loc, ProtZone.getCorner1(),
-							ProtZone.getCorner2()))
+					if (ProtZone.getCube().isInside(Loc, false))
 						Zone = ProtZone;
 				} else {
-					if (Zone.getSize() < ProtZone.getSize()) {
-						if (Util.isInside(Loc, ProtZone.getCorner1(),
-								ProtZone.getCorner2()))
+					if (Zone.getCube().getSize() < ProtZone.getCube().getSize()) {
+						if (ProtZone.getCube().isInside(Loc, false))
 							Zone = ProtZone;
 					}
 				}
@@ -1093,19 +1092,15 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 		for (ArrayList<ProtectionZone> Zones : Protections.values()) {
 			for (ProtectionZone ProtZone : Zones) {
 				if (Zone == null) {
-					if (Util.isInside(Loc, ProtZone.getCorner1(),
-							ProtZone.getCorner2()))
+					if (ProtZone.getCube().isInside(Loc, false))
 						Zone = ProtZone;
 				} else {
-					if (Zone.getSize() > ProtZone.getSize()) {
-						if (Util.isInsideY(Loc, ProtZone.getCorner1(),
-								ProtZone.getCorner2()))
+					if (Zone.getCube().getSize() > ProtZone.getCube().getSize()) {
+						if (ProtZone.getCube().isInside(Loc, true))
 							Zone = ProtZone;
 					} else {
-						if (Util.isInside(Loc, ProtZone.getCorner1(),
-								ProtZone.getCorner2())
-								&& !Util.isInsideY(Loc, Zone.getCorner1(),
-										Zone.getCorner2())) {
+						if (ProtZone.getCube().isInside(Loc, false)
+								&& !Zone.getCube().isInside(Loc, true)) {
 							Zone = ProtZone;
 						}
 					}
@@ -1181,73 +1176,92 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 				Sel1 = (Location) Selections.keySet().toArray()[0];
 				Sel2 = (Location) Selections.keySet().toArray()[1];
 			}
-			ProtectionZone newProt = new ProtectionZone(Sel1, Sel2,
+			ProtectionZone newProt = new ProtectionZone(new Region(Sel1, Sel2),
 					Plr.getName());
 			boolean resizeZone = false;
 			if (Protections.containsKey(Plr.getName())) {
 				for (ProtectionZone Zone : Protections.get(Plr.getName())) {
 					for (Location loc : GetCorners(Zone)) {
-						if (Util.isInsideY(loc, Sel1, Sel1)) {
+						boolean insideZone = false;
+						if (isInsideBiggestProtection(loc) == Zone) {
+							if (loc.getBlockX() == Sel1.getBlockX()
+									&& loc.getBlockZ() == Sel1.getBlockZ())
+								insideZone = true;
+						} else {
+							int MinY = Math.min(Sel1.getBlockY(),
+									Sel2.getBlockY());
+							int MaxY = Math.max(Sel1.getBlockY(),
+									Sel2.getBlockY());
+							if (loc.getBlockX() == Sel1.getBlockX()
+									&& loc.getBlockZ() == Sel1.getBlockZ()
+									&& loc.getBlockY() >= MinY
+									&& loc.getBlockY() <= MaxY)
+								insideZone = true;
+						}
+						if (insideZone) {
 							newProt = Zone.Clone();
-							if (loc == newProt.getCorner1()) {
-								newProt.setCorner1(Sel2);
+							if (loc.getBlockX() == newProt.getCube()
+									.getCorner1().getBlockX()
+									&& loc.getBlockZ() == newProt.getCube()
+											.getCorner1().getBlockZ()) {
+								newProt.getCube().setCorner1(Sel2);
 								resizeZone = true;
-							} else if (loc == newProt.getCorner2()) {
-								newProt.setCorner2(Sel2);
+							} else if (loc.getBlockX() == newProt.getCube()
+									.getCorner2().getBlockX()
+									&& loc.getBlockZ() == newProt.getCube()
+											.getCorner2().getBlockZ()) {
+								newProt.getCube().setCorner2(Sel2);
 								resizeZone = true;
-							} else if (loc.getBlockX() == newProt.getCorner1()
-									.getBlockX()
-									&& loc.getBlockZ() == newProt.getCorner2()
-											.getBlockZ()) {
-								Location newLoc = newProt.getCorner2();
-								newLoc.setZ(newProt.getCorner1().getZ());
-								newProt.setCorner1(newLoc);
-								newProt.setCorner2(Sel2);
+							} else if (loc.getBlockX() == newProt.getCube()
+									.getCorner3().getBlockX()
+									&& loc.getBlockZ() == newProt.getCube()
+											.getCorner3().getBlockZ()) {
+								newProt.getCube().setCorner3(Sel2);
 								resizeZone = true;
-							} else if (loc.getBlockX() == newProt.getCorner2()
-									.getBlockX()
-									&& loc.getBlockZ() == newProt.getCorner1()
-											.getBlockZ()) {
-								Location newLoc = newProt.getCorner1();
-								newLoc.setZ(newProt.getCorner2().getZ());
-								newProt.setCorner1(newLoc);
-								newProt.setCorner2(Sel2);
+							} else if (loc.getBlockX() == newProt.getCube()
+									.getCorner4().getBlockX()
+									&& loc.getBlockZ() == newProt.getCube()
+											.getCorner4().getBlockZ()) {
+								newProt.getCube().setCorner4(Sel2);
 								resizeZone = true;
 							}
 						}
 					}
 				}
 			}
-			int Length = newProt.getLength();
-			int Width = newProt.getWidth();
+			int Length = newProt.getCube().getLength();
+			int Width = newProt.getCube().getWidth();
 			if (Length >= getConfig().getInt("MinimumZoneSize")
 					&& Width >= getConfig().getInt("MinimumZoneSize")) {
 				ArrayList<ProtectionZone> Intersecting = new ArrayList<ProtectionZone>();
 				for (ArrayList<ProtectionZone> Zones : Protections.values()) {
 					for (ProtectionZone Zone : Zones) {
-						if (Util.zonesIntersect(newProt, Zone)) {
+						if (newProt.getCube().zonesIntersect(Zone.getCube(),
+								false)) {
 							if (!Zone.userHasAdminType(Plr.getName())) {
 								Intersecting.add(Zone);
 							} else {
 								ProtectionZone InsideZone = isInsideBiggestProtection(newProt
-										.getCorner1());
+										.getCube().getCorner1());
 								if (InsideZone == Zone) {
-									if (!Util.isInside(newProt.getCorner1(),
-											Zone.getCorner1(),
-											Zone.getCorner2())
-											|| !Util.isInside(
-													newProt.getCorner2(),
-													Zone.getCorner1(),
-													Zone.getCorner2()))
+									if (!Zone.getCube().isInside(
+											newProt.getCube().getCorner1(),
+											false)
+											|| !Zone.getCube().isInside(
+													newProt.getCube()
+															.getCorner2(),
+													false))
 										Intersecting.add(Zone);
-								} else if (Util.zonesIntersectY(newProt, Zone)) {
-									if (!Util.isInsideY(newProt.getCorner1(),
-											Zone.getCorner1(),
-											Zone.getCorner2())
-											|| !Util.isInsideY(
-													newProt.getCorner2(),
-													Zone.getCorner1(),
-													Zone.getCorner2()))
+								} else if (newProt.getCube().zonesIntersect(
+										Zone.getCube(), true)) {
+									if (!Zone.getCube().isInside(
+											newProt.getCube().getCorner1(),
+											true)
+											|| !Zone.getCube()
+													.isInside(
+															newProt.getCube()
+																	.getCorner2(),
+															true))
 										Intersecting.add(Zone);
 								}
 							}
@@ -1264,34 +1278,19 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 				if (Intersecting.isEmpty()) {
 					if (getConfig().getBoolean("BuyableLand") && !infinite) {
 						if (LandOwned.containsKey(Plr.getName())) {
-							int oldLength = 0;
-							int oldWidth = 0;
+							int oldSize = 0;
 							if (resizeZone) {
-								oldLength = Math
-										.abs(((ProtectionZone) PVP.PlayerSelectedZone
-												.get(Plr).keySet().toArray()[0])
-												.getCorner1().getBlockX()
-												- ((ProtectionZone) PVP.PlayerSelectedZone
-														.get(Plr).keySet()
-														.toArray()[0])
-														.getCorner2()
-														.getBlockX());
-								oldWidth = Math
-										.abs(((ProtectionZone) PVP.PlayerSelectedZone
-												.get(Plr).keySet().toArray()[0])
-												.getCorner1().getBlockZ()
-												- ((ProtectionZone) PVP.PlayerSelectedZone
-														.get(Plr).keySet()
-														.toArray()[0])
-														.getCorner2()
-														.getBlockZ());
+								oldSize = ((ProtectionZone) PVP.PlayerSelectedZone
+										.get(Plr).keySet().toArray()[0])
+										.getCube().getSize();
 							}
 							if ((LandOwned.get(Plr.getName())
-									- getTotalLandUsed(Plr) + (oldLength * oldWidth)) < (Length * Width)) {
+									- getTotalLandUsed(Plr) + oldSize) < newProt
+									.getCube().getSize()) {
 								Plr.sendMessage("You need "
-										+ ((Length * Width) - (LandOwned
+										+ (newProt.getCube().getSize() - (LandOwned
 												.get(Plr.getName())
-												- getTotalLandUsed(Plr) + (oldLength * oldWidth)))
+												- getTotalLandUsed(Plr) + oldSize))
 										+ " more blocks of land");
 								PVP.PlayerSelection.remove(Plr);
 								PVP.updateFakeBlocks(Plr);
@@ -1317,7 +1316,7 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 					return;
 				} else {
 					for (ProtectionZone Zone : Intersecting) {
-						DisplayProtection(Plr, Zone.getCorner1());
+						DisplayProtection(Plr, Zone.getCube().getCorner1());
 					}
 					Plr.sendMessage("The protection intersects another protection");
 				}
@@ -1334,12 +1333,10 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 	}
 
 	public ArrayList<Location> GetCorners(ProtectionZone Zone) {
-		Location Corner1 = Zone.getCorner1();
-		Location Corner2 = Zone.getCorner2();
-		Location Corner3 = Corner1.clone();
-		Corner3.setZ(Corner2.getZ());
-		Location Corner4 = Corner1.clone();
-		Corner4.setX(Corner2.getX());
+		Location Corner1 = Zone.getCube().getCorner1();
+		Location Corner2 = Zone.getCube().getCorner2();
+		Location Corner3 = Zone.getCube().getCorner3();
+		Location Corner4 = Zone.getCube().getCorner4();
 
 		ArrayList<Location> Corners = new ArrayList<Location>();
 
@@ -1980,16 +1977,29 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 					if (!Protections.containsKey(Event.getPlayer().getName())
 							|| Protections.get(Event.getPlayer().getName())
 									.isEmpty()) {
-						ProtectionZone newProt = new ProtectionZone(Event
-								.getBlock().getLocation().clone().add(5, 0, 5),
+						int DefaultSize = 0;
+						try {
+							DefaultSize = (int) Math.sqrt(getConfig()
+									.getDouble("StartLand"));
+						} catch (Exception e) {
+							getLogger()
+									.warning(
+											"Your 'StartLand' value in the config is not a square number!");
+						}
+						if (DefaultSize == 0)
+							return;
+						Region cube = new Region(Event.getBlock().getLocation()
+								.clone().add(DefaultSize, 0, DefaultSize),
 								Event.getBlock().getLocation().clone()
-										.add(-5, 0, -5), Event.getPlayer()
-										.getName());
+										.add(-DefaultSize, 0, -DefaultSize));
+						ProtectionZone newProt = new ProtectionZone(cube, Event
+								.getPlayer().getName());
 						boolean Intersecting = false;
 						for (ArrayList<ProtectionZone> Zones : Protections
 								.values()) {
 							for (ProtectionZone Zone : Zones) {
-								if (Util.zonesIntersect(newProt, Zone)) {
+								if (newProt.getCube().zonesIntersect(
+										Zone.getCube(), false)) {
 									Intersecting = true;
 								}
 							}
@@ -2254,6 +2264,9 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 		if (!getConfig().getBoolean("ZombiesBreakDoors")
 				&& Event.getEntityType() == EntityType.ZOMBIE)
 			Event.setCancelled(true);
+		if (!getConfig().getBoolean("WitherBlockDamage")
+				&& Event.getEntityType() == EntityType.WITHER)
+			Event.setCancelled(true);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -2280,6 +2293,12 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 			Event.setCancelled(true);
 		if (!getConfig().getBoolean("EnderCrystalBlockDamage")
 				&& Event.getEntityType() == EntityType.ENDER_CRYSTAL)
+			Event.setCancelled(true);
+		if (!getConfig().getBoolean("EnderDragonBlockDamage")
+				&& Event.getEntityType() == EntityType.COMPLEX_PART)
+			Event.setCancelled(true);
+		if (!getConfig().getBoolean("EnderDragonBlockDamage")
+				&& Event.getEntityType() == EntityType.ENDER_DRAGON)
 			Event.setCancelled(true);
 	}
 }
