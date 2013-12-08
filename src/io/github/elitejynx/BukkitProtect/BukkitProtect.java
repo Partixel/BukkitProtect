@@ -78,7 +78,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 @SuppressWarnings("deprecation")
 public class BukkitProtect extends JavaPlugin implements Listener {
 	// The class handling PVP
-	public static PVPHandler PVP;
+	public static TimerHandlers PVP;
 	public static BukkitProtect Plugin;
 	// Files
 	public String ProtectionPath;
@@ -205,7 +205,7 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 			}
 		SetupRods();
 		getServer().getPluginManager().registerEvents(this, this);
-		PVP = new PVPHandler(this);
+		PVP = new TimerHandlers(this);
 		getServer().getPluginManager().registerEvents(PVP, this);
 		new UpdateHandler(this, 68440, this.getFile(),
 				UpdateHandler.UpdateType.DEFAULT, true);
@@ -579,7 +579,8 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 				if (!Util.isTagAndValue(Args[0], Args[1])) {
 					for (Tag tag : Tags) {
 						Sender.sendMessage(tag.getName() + " : "
-								+ tag.getDesc());
+								+ tag.getDesc() + " : "
+								+ tag.getValues().toString());
 					}
 					Sender.sendMessage("That is not a valid tag");
 					return true;
@@ -610,7 +611,8 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 				return false;
 			} else {
 				for (Tag tag : Tags) {
-					Sender.sendMessage(tag.getName() + " : " + tag.getDesc());
+					Sender.sendMessage(tag.getName() + " : " + tag.getDesc()
+							+ " : " + tag.getValues().toString());
 				}
 				return false;
 			}
@@ -1880,12 +1882,13 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 															Event.getClickedBlock()
 																	.getLocation(),
 															Rod);
-												} else {
-													DisplayProtection(Event
-															.getPlayer(), Event
-															.getClickedBlock()
-															.getLocation());
 												}
+											} else if (Rod.getItemMeta()
+													.getLore() == null) {
+												DisplayProtection(Event
+														.getPlayer(), Event
+														.getClickedBlock()
+														.getLocation());
 											}
 										}
 									}
@@ -1905,11 +1908,7 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 									ItemStack Rod = Event.getPlayer()
 											.getInventory().getItemInHand();
 									if (RodTypes.contains(Rod.getType())) {
-										if (Rod.getItemMeta().getLore() != null
-												&& Rod.getItemMeta()
-														.getLore()
-														.get(0)
-														.equals("Protect your land")) {
+										if (Rod.getItemMeta().getLore() == null) {
 											DisplayProtection(
 													Event.getPlayer(), Event
 															.getClickedBlock()
