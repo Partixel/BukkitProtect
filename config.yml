@@ -17,6 +17,27 @@ LandGain: 20 #The amount you gain
 LandDelay: 1200 #The delay between each gain of land
 SendMessage: true #Sends a message when they gain land
 
+# Items
+
+#Any items you don't want people to be able to use in other peoples protections outside of normal
+#mining / placing (For example, a rod of protection from this plugin)
+BlockedItems:
+   - 2256
+   - 2257
+   - 2258
+   - 2259
+   - 2260
+   - 2261
+   - 2262
+   - 2263
+   - 2264
+   - 2265
+   - 2266
+   - 2267
+   - 351
+   - 381
+   - 385
+
 # Block
 
 RightClickIronDoor: true

@@ -678,6 +678,9 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 								.keySet().isEmpty()) {
 							Sender.sendMessage("This protection has no users");
 						} else {
+							Sender.sendMessage(((ProtectionZone) PVP.PlayerSelectedZone
+									.get(Sender).keySet().toArray()[0])
+									.getOwner() + " : Owner");
 							for (String User : ((ProtectionZone) PVP.PlayerSelectedZone
 									.get(Sender).keySet().toArray()[0])
 									.getUsers().keySet()) {
@@ -1918,17 +1921,12 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 								}
 							}, 2);
 					if (Event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-						if (Event.getItem().getType().isRecord())
-							Event.setUseItemInHand(Result.DENY);
-						if (Event.getItem().getType() == Material.EYE_OF_ENDER)
-							Event.setUseItemInHand(Result.DENY);
-						if (Event.getItem().getType() == Material.FIREBALL)
-							Event.setUseItemInHand(Result.DENY);
-						if (Event.getItem()
-								.isSimilar(
-										new ItemStack(Material.INK_SACK, 1,
-												(short) 15)))
-							Event.setUseItemInHand(Result.DENY);
+						List<Integer> ItemsIDs = getConfig().getIntegerList(
+								"BlockedItems");
+						for (int ID : ItemsIDs) {
+							if (Event.getItem().getType().getId() == ID)
+								Event.setUseItemInHand(Result.DENY);
+						}
 					}
 				}
 			}

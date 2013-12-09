@@ -93,7 +93,7 @@ public class ProtectionZone {
 	}
 
 	public boolean addUsers(String Plr, UserType Type) {
-		if (!Users.containsKey(Plr)) {
+		if (!Users.containsKey(Plr) && !Owner.equalsIgnoreCase(Plr)) {
 			ArrayList<String> Types = new ArrayList<String>();
 			if (Type == null) {
 				for (UserType UT : BukkitProtect.Plugin.Types) {
@@ -104,7 +104,7 @@ public class ProtectionZone {
 			}
 			Users.put(Plr, Types);
 			return true;
-		} else {
+		} else if (!Owner.equalsIgnoreCase(Plr)) {
 			ArrayList<String> Types = Users.get(Plr);
 			if (Type == null) {
 				Types = new ArrayList<String>();
@@ -121,6 +121,7 @@ public class ProtectionZone {
 			Users.put(Plr, Types);
 			return true;
 		}
+		return false;
 	}
 
 	public boolean removeUsers(String Plr, UserType Type) {
@@ -162,16 +163,16 @@ public class ProtectionZone {
 	}
 
 	public boolean setTags(String Tag, String Value) {
-		if (!getTag(Tag).equalsIgnoreCase(Value)) {
-			Tags.put(Tag, Value);
+		if (!getTag(Tag.toLowerCase()).equalsIgnoreCase(Value)) {
+			Tags.put(Tag.toLowerCase(), Value);
 			return true;
 		}
 		return false;
 	}
 
 	public boolean removeTags(String Tag) {
-		if (getTag(Tag) != "") {
-			Tags.remove(Tag);
+		if (getTag(Tag.toLowerCase()) != "") {
+			Tags.remove(Tag.toLowerCase());
 			return true;
 		}
 		return false;

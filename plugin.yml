@@ -1,6 +1,6 @@
 name: BukkitProtect
 main: io.github.elitejynx.BukkitProtect.BukkitProtect
-version: A-1.7
+version: B-1.7
 description: BukkitProtect, protecting your worlds since it was made!
 authors: [EliteJynx]
 permissions:
