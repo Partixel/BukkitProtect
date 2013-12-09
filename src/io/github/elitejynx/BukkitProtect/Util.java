@@ -49,6 +49,15 @@ public class Util {
 		return false;
 	}
 
+	public static Tag parseTag(String Name) {
+		for (Tag tag : BukkitProtect.Plugin.Tags) {
+			if (tag.getName().equalsIgnoreCase(Name)) {
+				return tag;
+			}
+		}
+		return null;
+	}
+
 	public static boolean poweringDoor(Block block) {
 		return block.getRelative(BlockFace.NORTH).getState().getData() instanceof Openable
 				|| block.getRelative(BlockFace.SOUTH).getState().getData() instanceof Openable
