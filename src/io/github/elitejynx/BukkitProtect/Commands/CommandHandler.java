@@ -143,7 +143,7 @@ public class CommandHandler implements CommandExecutor {
 					if (!Request.getAccepted()) {
 						Request.setAccepted(true);
 						onCommand(Request.getSender(), Request.getCommand(),
-								Request.getCommand().getName(),
+								Request.getCommand().getLabel(),
 								Request.getArgs());
 						Request.getSender().sendMessage(
 								"The command has been accepted");

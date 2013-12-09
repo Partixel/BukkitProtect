@@ -1091,45 +1091,56 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 					if (Event.getAction() == Action.RIGHT_CLICK_BLOCK
 							&& Event.getPlayer().hasPermission(
 									"BukkitProtect.Protection.MakeProtections")) {
-						Bukkit.getServer().getScheduler()
-								.scheduleSyncDelayedTask(this, new Runnable() {
-									@Override
-									public void run() {
-										ItemStack Rod = Event.getPlayer()
-												.getInventory().getItemInHand();
-										if (RodTypes.contains(Rod.getType())) {
-											if (Rod.getItemMeta().getLore() != null
-													&& Rod.getItemMeta()
-															.getLore()
-															.get(0)
-															.equals("Protect your land")) {
-												if (Event.getPlayer()
-														.isSneaking()) {
-													if (Rod.getAmount() > 1) {
-														Event.getPlayer()
-																.sendMessage(
-																		"You must not have more then one "
-																				+ Rod.getItemMeta()
-																						.getDisplayName()
-																				+ " in a stack");
-														return;
+						try {
+							Bukkit.getServer()
+									.getScheduler()
+									.scheduleSyncDelayedTask(this,
+											new Runnable() {
+												@Override
+												public void run() {
+													ItemStack Rod = Event
+															.getPlayer()
+															.getInventory()
+															.getItemInHand();
+													if (RodTypes.contains(Rod
+															.getType())) {
+														if (Rod.getItemMeta()
+																.getLore() != null
+																&& Rod.getItemMeta()
+																		.getLore()
+																		.get(0)
+																		.equals("Protect your land")) {
+															if (Event
+																	.getPlayer()
+																	.isSneaking()) {
+																if (Rod.getAmount() > 1) {
+																	Event.getPlayer()
+																			.sendMessage(
+																					"You must not have more then one "
+																							+ Rod.getItemMeta()
+																									.getDisplayName()
+																							+ " in a stack");
+																	return;
+																}
+																CornerRod(
+																		Event.getPlayer(),
+																		Event.getClickedBlock()
+																				.getLocation(),
+																		Rod);
+															}
+														} else if (Rod
+																.getItemMeta()
+																.getLore() == null) {
+															DisplayProtection(
+																	Event.getPlayer(),
+																	Event.getClickedBlock()
+																			.getLocation());
+														}
 													}
-													CornerRod(
-															Event.getPlayer(),
-															Event.getClickedBlock()
-																	.getLocation(),
-															Rod);
 												}
-											} else if (Rod.getItemMeta()
-													.getLore() == null) {
-												DisplayProtection(Event
-														.getPlayer(), Event
-														.getClickedBlock()
-														.getLocation());
-											}
-										}
-									}
-								}, 2);
+											}, 2);
+						} catch (Exception e) {
+						}
 					}
 				}
 			}
@@ -1138,22 +1149,25 @@ public class BukkitProtect extends JavaPlugin implements Listener {
 			Event.setUseItemInHand(Result.ALLOW);
 			if (Event.hasBlock()) {
 				if (Event.getItem() != null) {
-					Bukkit.getServer().getScheduler()
-							.scheduleSyncDelayedTask(this, new Runnable() {
-								@Override
-								public void run() {
-									ItemStack Rod = Event.getPlayer()
-											.getInventory().getItemInHand();
-									if (RodTypes.contains(Rod.getType())) {
-										if (Rod.getItemMeta().getLore() == null) {
-											DisplayProtection(
-													Event.getPlayer(), Event
-															.getClickedBlock()
-															.getLocation());
+					try {
+						Bukkit.getServer().getScheduler()
+								.scheduleSyncDelayedTask(this, new Runnable() {
+									@Override
+									public void run() {
+										ItemStack Rod = Event.getPlayer()
+												.getInventory().getItemInHand();
+										if (RodTypes.contains(Rod.getType())) {
+											if (Rod.getItemMeta().getLore() == null) {
+												DisplayProtection(Event
+														.getPlayer(), Event
+														.getClickedBlock()
+														.getLocation());
+											}
 										}
 									}
-								}
-							}, 2);
+								}, 2);
+					} catch (Exception e) {
+					}
 					if (Event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 						List<Integer> ItemsIDs = getConfig().getIntegerList(
 								"BlockedItems");
