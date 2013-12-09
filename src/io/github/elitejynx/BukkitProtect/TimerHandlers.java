@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -20,6 +21,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerLoginEvent.Result;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
@@ -32,6 +36,10 @@ public class TimerHandlers implements Listener {
 	public Map<Player, Map<Location, Integer>> PlayerSelection = new HashMap<Player, Map<Location, Integer>>();
 	public Map<Player, Map<ProtectionZone, Integer>> PlayerSelectedZone = new HashMap<Player, Map<ProtectionZone, Integer>>();
 	public Map<Player, Integer> PlayerGain = new HashMap<Player, Integer>();
+	public Map<Player, Integer> playerLastChat = new HashMap<Player, Integer>();
+	public Map<Player, String> playerLastChatMessage = new HashMap<Player, String>();
+	public Map<Player, Integer> playerSpam = new HashMap<Player, Integer>();
+	public Map<String, Long> loginSpam = new HashMap<String, Long>();
 
 	public void updateFakeBlocks(Player Plr) {
 		if (UpdateBlock.containsKey(Plr)) {
@@ -169,6 +177,102 @@ public class TimerHandlers implements Listener {
 			return PVPLogs.get(plr).getPlrs().contains(att);
 		}
 		return false;
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void PlayerLogin(PlayerLoginEvent event) {
+		if (loginSpam.containsKey(event.getAddress().getHostAddress())) {
+			if ((System.currentTimeMillis() - loginSpam.get(event.getAddress()
+					.getHostAddress())) <= BukkitProtect.Plugin.getConfig()
+					.getDouble("LimitLogins")) {
+				event.disallow(Result.KICK_OTHER,
+						"You have been kicked for joining more then once in a short period of time");
+				loginSpam.put(event.getAddress().getHostAddress(),
+						System.currentTimeMillis());
+			} else {
+				loginSpam.remove(event.getAddress().getHostAddress());
+			}
+		} else {
+			loginSpam.put(event.getAddress().getHostAddress(),
+					System.currentTimeMillis());
+		}
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void PlayerChat(AsyncPlayerChatEvent event) {
+		Player player = event.getPlayer();
+		String message = event.getMessage();
+		int totalCensored = 0;
+		double caps = 0;
+		double total = message.length();
+		for (int i = 0; i < total; i++) {
+			char chara = message.charAt(i);
+			if (chara >= 'A' && chara <= 'Z') {
+				caps += 1;
+			}
+		}
+		int percent = (int) Math.round((caps / total) * 100);
+		String[] words = message.split(" ");
+		if (percent > BukkitProtect.Plugin.getConfig().getDouble(
+				"CapsPercentage"))
+			message = message.toLowerCase();
+		for (int i = 0; i < words.length; i++) {
+			String word = words[i];
+			if (word.length() > BukkitProtect.Plugin.getConfig().getDouble(
+					"MaxWordLength")) {
+				totalCensored = totalCensored + word.length();
+				message = message.replaceAll(word, "****");
+			}
+		}
+		for (String word : BukkitProtect.Plugin.getConfig().getStringList(
+				"BannedWords")) {
+			totalCensored = totalCensored + word.length();
+			message = message.replaceAll("(?i)" + word, "****");
+		}
+		percent = (int) Math.round((totalCensored / total) * 100);
+		if (percent > BukkitProtect.Plugin.getConfig().getDouble("CensorLimit"))
+			event.setCancelled(true);
+		event.setMessage(message);
+		int time = (int) System.currentTimeMillis();
+		if (playerLastChat.containsKey(player)
+				&& playerLastChatMessage.containsKey(player)) {
+			int lastChat = playerLastChat.get(player);
+			String lastMessage = playerLastChatMessage.get(player);
+			playerLastChat.put(player, time);
+			playerLastChatMessage.put(player, message);
+			double chatTime = (time - lastChat) / 1000;
+			if (!playerSpam.containsKey(player)) {
+				playerSpam.put(player, 0);
+				return;
+			}
+			if (lastMessage.equalsIgnoreCase(message)) {
+				event.setCancelled(true);
+			} else if (chatTime >= BukkitProtect.Plugin.getConfig().getDouble(
+					"ChatSpam")) {
+				int spam = playerSpam.get(player);
+				playerSpam.put(player, spam - 1);
+				return;
+			} else {
+				if (playerSpam.get(player) >= 2)
+					event.setCancelled(true);
+			}
+			int spam = playerSpam.get(player);
+			playerSpam.put(player, spam + 1);
+			if (spam == 2)
+				player.sendMessage(ChatColor.GOLD + "Do not spam");
+			else if (spam == 5)
+				player.sendMessage(ChatColor.GOLD + "Last warning");
+			else if (spam == 10) {
+				player.kickPlayer("Do not spam!");
+				BukkitProtect.Plugin.getServer().broadcastMessage(
+						player.getDisplayName() + ChatColor.RED
+								+ " has been kicked for spamming!");
+				event.setCancelled(true);
+			}
+		} else {
+			playerLastChat.put(player, time);
+			playerLastChatMessage.put(player, message);
+		}
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

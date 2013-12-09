@@ -45,7 +45,7 @@ public class CommandHandler implements CommandExecutor {
 			Sender.sendMessage("Given " + ((Player) Sender).getDisplayName()
 					+ " the " + Plugin.RodA.getItemMeta().getDisplayName());
 		}
-		return false;
+		return true;
 	}
 
 	public boolean SetOwner(CommandSender Sender, Command Cmd, String Label,
@@ -126,7 +126,7 @@ public class CommandHandler implements CommandExecutor {
 		} else {
 			return false;
 		}
-		return false;
+		return true;
 	}
 
 	public boolean Accept(CommandSender Sender, Command Cmd, String Label,
@@ -162,7 +162,7 @@ public class CommandHandler implements CommandExecutor {
 		} else {
 			((Player) Sender).getInventory().addItem(Plugin.RodA);
 		}
-		return false;
+		return true;
 	}
 
 	public boolean Transfer(CommandSender Sender, Command Cmd, String Label,
@@ -273,7 +273,7 @@ public class CommandHandler implements CommandExecutor {
 		} else {
 			return false;
 		}
-		return false;
+		return true;
 	}
 
 	public boolean AddUsers(CommandSender Sender, Command Cmd, String label,
@@ -329,7 +329,7 @@ public class CommandHandler implements CommandExecutor {
 		} else {
 			return false;
 		}
-		return false;
+		return true;
 	}
 
 	public boolean AddTag(CommandSender Sender, Command Cmd, String label,
@@ -378,7 +378,7 @@ public class CommandHandler implements CommandExecutor {
 		} else {
 			return false;
 		}
-		return false;
+		return true;
 	}
 
 	public boolean GetTags(CommandSender Sender, Command Cmd, String label,
@@ -423,7 +423,7 @@ public class CommandHandler implements CommandExecutor {
 		} else {
 			return false;
 		}
-		return false;
+		return true;
 	}
 
 	public boolean GetUsers(CommandSender Sender, Command Cmd, String label,
@@ -466,7 +466,7 @@ public class CommandHandler implements CommandExecutor {
 		} else {
 			return false;
 		}
-		return false;
+		return true;
 	}
 
 	public boolean RemoveUsers(CommandSender Sender, Command Cmd, String label,
@@ -524,7 +524,7 @@ public class CommandHandler implements CommandExecutor {
 		} else {
 			return false;
 		}
-		return false;
+		return true;
 	}
 
 	public boolean RemoveTag(CommandSender Sender, Command Cmd, String label,
@@ -572,7 +572,7 @@ public class CommandHandler implements CommandExecutor {
 		} else {
 			return false;
 		}
-		return false;
+		return true;
 	}
 
 	public boolean RemoveProtection(CommandSender Sender, Command Cmd,
@@ -625,7 +625,7 @@ public class CommandHandler implements CommandExecutor {
 		} else {
 			return false;
 		}
-		return false;
+		return true;
 	}
 
 	public boolean RemoveAllProtections(CommandSender Sender, Command Cmd,
@@ -672,7 +672,7 @@ public class CommandHandler implements CommandExecutor {
 			Sender.sendMessage("Too many arguements, please retry");
 			return false;
 		} else {
-			return false;
+			return true;
 		}
 	}
 
@@ -720,7 +720,7 @@ public class CommandHandler implements CommandExecutor {
 		} else {
 			return false;
 		}
-		return false;
+		return true;
 	}
 
 	public boolean Stuck(CommandSender Sender, Command Cmd, String label,
@@ -752,7 +752,7 @@ public class CommandHandler implements CommandExecutor {
 		} else {
 			return false;
 		}
-		return false;
+		return true;
 	}
 
 	public boolean SetLand(CommandSender Sender, Command Cmd, String label,
@@ -794,7 +794,7 @@ public class CommandHandler implements CommandExecutor {
 		} else {
 			return false;
 		}
-		return false;
+		return true;
 	}
 
 	public boolean GetLand(CommandSender Sender, Command Cmd, String label,
@@ -852,7 +852,7 @@ public class CommandHandler implements CommandExecutor {
 		} else {
 			return false;
 		}
-		return false;
+		return true;
 	}
 
 	@Override
