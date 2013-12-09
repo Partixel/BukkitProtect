@@ -8,7 +8,7 @@ LimitLogins: 5 #Players will be kicked if they join twice within a space of this
 CapsPercentage: 70 #If a players chat contains more then this percentage of capitals it will be changed to lower case
 MaxWordLength: 15 #If a player types a word longer then this (for example 'asdgasdgasgaga') it will be blocked
 CensorLimit: 70 #If more then this percentage of a message is censored it is blocked
-ChatSpam: 2 #Limit between the time a player can chat again
+ChatSpam: 1 #Limit between the time a player can chat again
 
 BannedWords: #Any words in this list will be blocked
    #- Fuck
