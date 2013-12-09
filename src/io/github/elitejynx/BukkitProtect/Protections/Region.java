@@ -1,4 +1,6 @@
-package io.github.elitejynx.BukkitProtect;
+package io.github.elitejynx.BukkitProtect.Protections;
+
+import io.github.elitejynx.BukkitProtect.Util;
 
 import org.bukkit.Location;
 

@@ -1,4 +1,4 @@
-package io.github.elitejynx.BukkitProtect;
+package io.github.elitejynx.BukkitProtect.Protections;
 
 import org.bukkit.Material;
 

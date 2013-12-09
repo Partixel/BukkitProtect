@@ -1,12 +1,34 @@
 package io.github.elitejynx.BukkitProtect;
 
+import io.github.elitejynx.BukkitProtect.Protections.Region;
+import io.github.elitejynx.BukkitProtect.Protections.Tag;
+import io.github.elitejynx.BukkitProtect.Protections.UserType;
+
+import java.util.List;
+import java.util.UUID;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.material.Openable;
 
 public class Util {
+
+	public static World worldFromUUID(String ID) {
+		try {
+			List<World> Worlds = BukkitProtect.Plugin.getServer().getWorlds();
+			for (World world : Worlds) {
+				if (world.getUID().equals(UUID.fromString(ID))) {
+					return world;
+				}
+			}
+		} catch (Exception e) {
+			return null;
+		}
+		return null;
+	}
 
 	public static boolean isTagAndValue(String Name, String Value) {
 		for (Tag tag : BukkitProtect.Plugin.Tags) {
