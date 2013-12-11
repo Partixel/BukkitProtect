@@ -202,35 +202,58 @@ public class TimerHandlers implements Listener {
 	public void PlayerChat(AsyncPlayerChatEvent event) {
 		Player player = event.getPlayer();
 		String message = event.getMessage();
-		int totalCensored = 0;
-		double caps = 0;
-		double total = message.length();
-		for (int i = 0; i < total; i++) {
-			char chara = message.charAt(i);
-			if (chara >= 'A' && chara <= 'Z') {
-				caps += 1;
-			}
-		}
-		int percent = (int) Math.round((caps / total) * 100);
+		double totalCensored = 0;
+		int length = message.length();
 		String[] words = message.split(" ");
-		if (percent > BukkitProtect.Plugin.getConfig().getDouble(
-				"CapsPercentage"))
-			message = message.toLowerCase();
-		for (int i = 0; i < words.length; i++) {
-			String word = words[i];
-			if (word.length() > BukkitProtect.Plugin.getConfig().getDouble(
+		for (String word : words) {
+			if (word.length() >= BukkitProtect.Plugin.getConfig().getDouble(
 					"MaxWordLength")) {
 				totalCensored = totalCensored + word.length();
-				message = message.replaceAll(word, "****");
+				message = message.replaceFirst(word, "****");
+			} else {
+				double caps = 0;
+				int repeated = 1;
+				char charac = ' ';
+				for (char chara : word.toCharArray()) {
+					if (Character.isLetter(chara)
+							&& Character.isUpperCase(chara)) {
+						caps += 1;
+					}
+					if (chara == charac) {
+						repeated += 1;
+						if (repeated > BukkitProtect.Plugin.getConfig()
+								.getDouble("LetterDragging")) {
+							totalCensored = totalCensored + word.length();
+							message = message.replaceFirst(word, "****");
+						}
+					} else {
+						charac = chara;
+						repeated = 1;
+					}
+					int percent = (int) Math
+							.round((caps / word.length()) * 100);
+					if (percent >= BukkitProtect.Plugin.getConfig().getDouble(
+							"CapsPercentage")
+							&& word.length() != 1) {
+						message = message
+								.replaceFirst(word, word.toLowerCase());
+					}
+				}
 			}
 		}
+		words = message.split(" ");
 		for (String word : BukkitProtect.Plugin.getConfig().getStringList(
 				"BannedWords")) {
-			totalCensored = totalCensored + word.length();
-			message = message.replaceAll("(?i)" + word, "****");
+			for (String worda : words) {
+				if (worda.toLowerCase().contains(word.toLowerCase())) {
+					totalCensored = totalCensored + worda.length();
+					message = message.replaceFirst(worda, "****");
+				}
+			}
 		}
-		percent = (int) Math.round((totalCensored / total) * 100);
-		if (percent > BukkitProtect.Plugin.getConfig().getDouble("CensorLimit"))
+		int percent = (int) Math.round((totalCensored / length) * 100);
+		if (percent >= BukkitProtect.Plugin.getConfig()
+				.getDouble("CensorLimit"))
 			event.setCancelled(true);
 		event.setMessage(message);
 		int time = (int) System.currentTimeMillis();
@@ -246,6 +269,8 @@ public class TimerHandlers implements Listener {
 				return;
 			}
 			if (lastMessage.equalsIgnoreCase(message)) {
+				event.getPlayer().sendMessage(
+						ChatColor.RED + "Do not repeat yourself");
 				event.setCancelled(true);
 			} else if (chatTime >= BukkitProtect.Plugin.getConfig().getDouble(
 					"ChatSpam")) {
